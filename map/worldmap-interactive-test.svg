@@ -151,28 +151,32 @@
         letter-spacing: -.01em;
       }
 
+      .cls-35 {
+        opacity: 0;
+      }
+
       .cls-23 {
         fill: #4c4d4d;
         font-size: 8px;
       }
 
-      .cls-35 {
+      .cls-36 {
         letter-spacing: 0em;
       }
 
-      .cls-36 {
+      .cls-37 {
         fill: #13d4c1;
       }
 
-      .cls-36, .cls-37 {
+      .cls-37, .cls-38 {
         opacity: .5;
       }
 
-      .cls-37 {
+      .cls-38 {
         fill: #c78312;
       }
 
-      .cls-38 {
+      .cls-39 {
         letter-spacing: -.01em;
       }
     </style>
@@ -11701,7 +11705,7 @@
     <g id="control-enso">
       <g id="btn-elnino">
         <rect class="cls-11" x="502.7" y="194.04" width="58.67" height="19.56" rx="6.45" ry="6.45"/>
-        <text class="cls-21" transform="translate(512.31 207.14)"><tspan class="cls-35" x="0" y="0">E</tspan><tspan class="cls-15" x="6.25" y="0">L NIÑO</tspan></text>
+        <text class="cls-21" transform="translate(512.31 207.14)"><tspan class="cls-36" x="0" y="0">E</tspan><tspan class="cls-15" x="6.25" y="0">L NIÑO</tspan></text>
       </g>
       <g id="btn-lanina">
         <rect class="cls-12" x="563.65" y="194.04" width="58.67" height="19.56" rx="6.45" ry="6.45"/>
@@ -11709,13 +11713,13 @@
       </g>
       <text class="cls-23" transform="translate(552 188.71)"><tspan class="cls-33" x="0" y="0">E</tspan><tspan x="5" y="0">N</tspan><tspan class="cls-7" x="10.97" y="0">S</tspan><tspan x="16.16" y="0">O</tspan></text>
     </g>
-    <g id="impact-enso-se-aus">
-      <path class="cls-37" d="m388.09,276.89c6.67-7.56,6.96-10.11,7.11-13.33.49-10.49-20.99-14.91-22.67-30.22-.83-7.6,3.7-13.43,4.39-14.29,6.11-7.61,17.01-8.73,23.61-7.73,18.39,2.79,31.22,26.17,32.89,46.01.29,3.43,2.46,34.02-16.44,42.67-14.28,6.53-36.06-1.54-38.22-12.44-.42-2.14,5.87-5.69,9.33-10.67Z"/>
-      <text class="cls-27" transform="translate(370.39 251.84)"><tspan class="cls-28" x="0" y="0">H</tspan><tspan class="cls-4" x="5.31" y="0">o</tspan><tspan x="9.11" y="0">t</tspan><tspan class="cls-14" x="11.83" y="0">,</tspan><tspan class="cls-34" x="13.48" y="0"> </tspan><tspan class="cls-3" x="15.09" y="0">d</tspan><tspan class="cls-19" x="19.31" y="0">r</tspan><tspan class="cls-17" x="22.14" y="0">y</tspan><tspan x="25.86" y="0"> </tspan><tspan class="cls-31" x="0" y="8.4">w</tspan><tspan class="cls-14" x="5.39" y="8.4">e</tspan><tspan class="cls-20" x="9.31" y="8.4">a</tspan><tspan x="13.03" y="8.4">ther J</tspan><tspan class="cls-32" x="30.91" y="8.4">u</tspan><tspan x="35.02" y="8.4">n </tspan><tspan class="cls-38" x="0" y="16.8">t</tspan><tspan class="cls-14" x="2.63" y="16.8">o</tspan><tspan x="6.54" y="16.8"> </tspan><tspan class="cls-29" x="8.24" y="16.8">N</tspan><tspan class="cls-31" x="13.47" y="16.8">o</tspan><tspan class="cls-17" x="17.36" y="16.8">v</tspan></text>
-      <text class="cls-27" transform="translate(402.38 294.79)"><tspan class="cls-28" x="0" y="0">H</tspan><tspan class="cls-4" x="5.31" y="0">o</tspan><tspan x="9.11" y="0">t</tspan><tspan class="cls-14" x="11.83" y="0">,</tspan><tspan class="cls-34" x="13.48" y="0"> </tspan><tspan class="cls-3" x="15.09" y="0">d</tspan><tspan class="cls-19" x="19.31" y="0">r</tspan><tspan class="cls-17" x="22.14" y="0">y</tspan><tspan x="25.86" y="0"> </tspan><tspan class="cls-31" x="0" y="8.4">w</tspan><tspan class="cls-14" x="5.39" y="8.4">e</tspan><tspan class="cls-20" x="9.31" y="8.4">a</tspan><tspan x="13.03" y="8.4">ther J</tspan><tspan class="cls-32" x="30.91" y="8.4">u</tspan><tspan x="35.02" y="8.4">n </tspan><tspan class="cls-38" x="0" y="16.8">t</tspan><tspan class="cls-14" x="2.63" y="16.8">o</tspan><tspan x="6.54" y="16.8" xml:space="preserve"> Jan</tspan></text>
+    <g id="impact-enso-se-aus" class="cls-35">
+      <path class="cls-38" d="m388.09,276.89c6.67-7.56,6.96-10.11,7.11-13.33.49-10.49-20.99-14.91-22.67-30.22-.83-7.6,3.7-13.43,4.39-14.29,6.11-7.61,17.01-8.73,23.61-7.73,18.39,2.79,31.22,26.17,32.89,46.01.29,3.43,2.46,34.02-16.44,42.67-14.28,6.53-36.06-1.54-38.22-12.44-.42-2.14,5.87-5.69,9.33-10.67Z"/>
+      <text class="cls-27" transform="translate(370.39 251.84)"><tspan class="cls-28" x="0" y="0">H</tspan><tspan class="cls-4" x="5.31" y="0">o</tspan><tspan x="9.11" y="0">t</tspan><tspan class="cls-14" x="11.83" y="0">,</tspan><tspan class="cls-34" x="13.48" y="0"> </tspan><tspan class="cls-3" x="15.09" y="0">d</tspan><tspan class="cls-19" x="19.31" y="0">r</tspan><tspan class="cls-17" x="22.14" y="0">y</tspan><tspan x="25.86" y="0"> </tspan><tspan class="cls-31" x="0" y="8.4">w</tspan><tspan class="cls-14" x="5.39" y="8.4">e</tspan><tspan class="cls-20" x="9.31" y="8.4">a</tspan><tspan x="13.03" y="8.4">ther J</tspan><tspan class="cls-32" x="30.91" y="8.4">u</tspan><tspan x="35.02" y="8.4">n </tspan><tspan class="cls-39" x="0" y="16.8">t</tspan><tspan class="cls-14" x="2.63" y="16.8">o</tspan><tspan x="6.54" y="16.8"> </tspan><tspan class="cls-29" x="8.24" y="16.8">N</tspan><tspan class="cls-31" x="13.47" y="16.8">o</tspan><tspan class="cls-17" x="17.36" y="16.8">v</tspan></text>
+      <text class="cls-27" transform="translate(402.38 294.79)"><tspan class="cls-28" x="0" y="0">H</tspan><tspan class="cls-4" x="5.31" y="0">o</tspan><tspan x="9.11" y="0">t</tspan><tspan class="cls-14" x="11.83" y="0">,</tspan><tspan class="cls-34" x="13.48" y="0"> </tspan><tspan class="cls-3" x="15.09" y="0">d</tspan><tspan class="cls-19" x="19.31" y="0">r</tspan><tspan class="cls-17" x="22.14" y="0">y</tspan><tspan x="25.86" y="0"> </tspan><tspan class="cls-31" x="0" y="8.4">w</tspan><tspan class="cls-14" x="5.39" y="8.4">e</tspan><tspan class="cls-20" x="9.31" y="8.4">a</tspan><tspan x="13.03" y="8.4">ther J</tspan><tspan class="cls-32" x="30.91" y="8.4">u</tspan><tspan x="35.02" y="8.4">n </tspan><tspan class="cls-39" x="0" y="16.8">t</tspan><tspan class="cls-14" x="2.63" y="16.8">o</tspan><tspan x="6.54" y="16.8" xml:space="preserve"> Jan</tspan></text>
     </g>
-    <g id="impact-enso-sth-usa">
-      <path class="cls-36" d="m585.72,122.96c6.65,8.63,19.54,2.37,55.35,2.4,24.98.02,34.82,3.09,39.46-3.59,4.95-7.13.72-20.65-4.36-21.81-5.55-1.27-10.05,12.66-16.97,11.74-7.49-1-6.55-17.89-15.41-20.74-8.97-2.89-14.61,12.94-31.41,14.81-13.38,1.49-20.78-7.32-26.28-2.84-4.5,3.67-5,14.05-.39,20.03Z"/>
+    <g id="impact-enso-sth-usa" class="cls-35">
+      <path class="cls-37" d="m585.72,122.96c6.65,8.63,19.54,2.37,55.35,2.4,24.98.02,34.82,3.09,39.46-3.59,4.95-7.13.72-20.65-4.36-21.81-5.55-1.27-10.05,12.66-16.97,11.74-7.49-1-6.55-17.89-15.41-20.74-8.97-2.89-14.61,12.94-31.41,14.81-13.38,1.49-20.78-7.32-26.28-2.84-4.5,3.67-5,14.05-.39,20.03Z"/>
       <text class="cls-26" transform="translate(567.58 119.97)"><tspan class="cls-16" x="0" y="0">W</tspan><tspan class="cls-4" x="6.36" y="0">e</tspan><tspan x="10.16" y="0">t Jan </tspan><tspan class="cls-18" x="26.91" y="0">t</tspan><tspan class="cls-25" x="29.54" y="0">o</tspan><tspan x="33.46" y="0" xml:space="preserve"> Apr</tspan></text>
       <text class="cls-26" transform="translate(655.69 119.97)"><tspan class="cls-16" x="0" y="0">W</tspan><tspan class="cls-4" x="6.36" y="0">e</tspan><tspan x="10.16" y="0">t </tspan><tspan class="cls-28" x="14.58" y="0">N</tspan><tspan class="cls-31" x="19.81" y="0">o</tspan><tspan class="cls-8" x="23.7" y="0">v</tspan><tspan x="27.21" y="0"> </tspan><tspan class="cls-24" x="28.91" y="0">t</tspan><tspan class="cls-13" x="31.54" y="0">o</tspan><tspan x="35.45" y="0" xml:space="preserve"> Apr</tspan></text>
     </g>

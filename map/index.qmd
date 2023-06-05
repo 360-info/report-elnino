@@ -35,8 +35,8 @@ mapGraphic = {
 
   btnElnino.on("click", function() {
     console.log("El Niño button clicked")
-    impactsElnino.style("opacity", 0.5)
-    btnElnino.style("opacity", 0.5)
+    impactsElnino.style("opacity", 1)
+    btnElnino.style("opacity", 1)
     mapCaption.text("Now we can describe El Niño impacts in more detail!")
   })
 
