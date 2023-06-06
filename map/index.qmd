@@ -1,9 +1,7 @@
 ---
-title: El Niño
+# title: Global climate drivers
 format:
   360-embed-html: default
-author: James Goldie
-date: last-modified
 resources:
   - worldmap-interactive-test.svg
 360embed:
@@ -18,26 +16,72 @@ resources:
 {{< include _popup-buttons.qmd >}}
 
 ```{ojs}
-/* load svg for interaction:
-   https://observablehq.com/@rawgraphs/load-svg-and-add-simple-interaction */
 mapGraphic = {
-  const mapString = await FileAttachment("worldmap-interactive-test.svg").text()
+  
+  // load svg for interaction:
+  // https://observablehq.com/@rawgraphs/load-svg-and-add-simple-interaction
+  const mapString = await
+    FileAttachment("worldmap-interactive-test.svg").text();
   const svgDoc = (new DOMParser).parseFromString(mapString, "image/svg+xml");
   const svg = d3.select(svgDoc.documentElement).remove();
 
-  /* interaction code */
+  // TODO - inject some classes?
+  svg.insert("svg:style").text(`
+  .hidden {
+    opacity: 0;
+  }
 
+  .deemphasised {
+    opacity: 0.25;
+  }
+  `)
+
+  // helper functions to show and hide things
+  const hideSelection = (selection) =>
+    selection.classed("hidden", true).attr("aria-hidden", "true");
+  const showSelection = (selection) =>
+    selection.classed("hidden", false).attr("aria-hidden", "false");
+  const deemphasise = (selection) =>
+    selection
+      .classed("hidden", false)
+      .classed("deemphasised", true)
+      .attr("aria-hidden", "false")
+  const emphasise = (selection) =>
+    selection.classed("deemphasised", false).attr("aria-hidden", "false");
+  
+  // to start, show buttons, hide impacts, and make buttons focusable
+  let allButtons = svg.selectAll("[id^=\"btn-\"]");
+  let allImpacts = svg.selectAll("[id^=\"impact-\"]");
+  let mapCaption = d3.select("#mapcaption");
+
+  allButtons.attr("tabindex", "0");
+  hideSelection(allImpacts);
+  showSelection(allButtons);
+
+  // el nino button: surface el-nino specific stuff
   let btnElnino = svg.select("#btn-elnino")
-  let impactsElnino = svg.selectAll("#impact-enso-sth-usa, #impact-enso-se-aus")
-  let mapCaption = d3.select("#mapcaption")
-  // console.log("Map caption element:")
-  // console.log(mapCaption)
-
+  let btnLanina = svg.select("#btn-lanina")
   btnElnino.on("click", function() {
-    console.log("El Niño button clicked")
-    impactsElnino.style("opacity", 1)
-    btnElnino.style("opacity", 1)
+
+    hideSelection(allImpacts)
+    deemphasise(allButtons)
+
+    let impactsElnino = svg.selectAll("[id^=\"impact-elnino-\"]")
+    showSelection(impactsElnino)
+    emphasise(btnElnino)
+    deemphasise(btnLanina)
     mapCaption.text("Now we can describe El Niño impacts in more detail!")
+  })
+
+  // TODO - other button handlers
+
+  // TODO - handler for basemap, to return things?
+  // TODO - need to rework button states to be more consistent
+  let basemap = svg.select("#worldmap")
+  basemap.on("click", function() {
+    hideSelection(allImpacts)
+    showSelection(allButtons)
+    mapCaption.text("Choose a climate driver")
   })
 
   return svg.node()
@@ -48,5 +92,7 @@ mapGraphic = {
 ```{=html}
 <p id="mapcaption">We can put a message here.</p>
 ```
+
+
 
 {{< include _popup-dialogs.qmd >}}
