@@ -4,3 +4,28 @@ author: "James Goldie"
 format: html
 ---
 
+## Analysis: Indian rainfall and ENSO
+
+```{r}
+#| label: setup
+
+library(tidyverse)
+library(here)
+```
+
+```{r}
+#| label: import
+
+list.files(here("data", "monsoon"), pattern = glob2rx("*.csv"),
+  full.names = TRUE) |>
+  set_names(x = _) |>
+  map_dfr(read_csv, .id = "path", col_types = "idddddiddddd") |>
+  mutate(
+    region = str_replace_all(
+      basename(path),
+      c("india-rainfall-jjas-" = "", ".csv" = ""))) |>
+  select(year = actual_year, region, everything(), -path, -anomalypct_year) |>
+  write_csv(here("data", "india-rainfall-jjas.csv")) ->
+india_rainfall
+
+```
