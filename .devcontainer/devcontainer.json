@@ -4,7 +4,7 @@
 {
 	"name": "R (rocker/r-ver base)",
 	/* set the r version here */
-	"image": "ghcr.io/rocker-org/devcontainer/r-ver:4.2",
+	"image": "ghcr.io/rocker-org/devcontainer/r-ver:4.3",
 	
 	/* set this to a recent cran freeze when you start working on a project
 	 find one at https://packagemanager.posit.co/client/#/repos/2/overview */
@@ -27,7 +27,7 @@
 		},
 		/* add additional r packages here */
 		"ghcr.io/rocker-org/devcontainer-features/r-packages:1": {
-			"packages": "github::rstudio/renv,tidyverse,here,httpgd"
+			"packages": "github::rstudio/renv,tidyverse,here,httpgd,janitor"
 		},
 	},
 
