@@ -4,17 +4,23 @@ author: "James Goldie"
 format: html
 ---
 
+```{r}
+#| label: setup
+library(tidyverse)
+library(broom)
+library(here)
+
+# consistent colours for enso phases
+enso_colours <- c(
+  "lanina" = "#3333bb",
+  "neutral" = "lightgrey",
+  "elnino" = "#dd3333")
+```
+
 ## Analysis: Indian rainfall and ENSO
 
 ```{r}
-#| label: setup
-
-library(tidyverse)
-library(here)
-```
-
-```{r}
-#| label: import
+#| label: india-rainfall
 
 list.files(here("data", "monsoon"), pattern = glob2rx("*.csv"),
   full.names = TRUE) |>
@@ -29,3 +35,183 @@ list.files(here("data", "monsoon"), pattern = glob2rx("*.csv"),
 india_rainfall
 
 ```
+
+## Analysis: monthly SOI to JJAS SOI
+
+And here's the average SOI over June–September each year.
+
+::: {.callout-note}
+There're many ways to classify El Niños! This is just one indicator! But SOI _does_ give us a decent indication of wind activity over that period.
+:::
+
+```{r}
+#| label: tidy-soi
+#| 
+here("data", "soi-monthly-raw.csv") |>
+  read_csv(col_names = c("year_month", "value")) |>
+  separate(year_month, into = c("year", "month"), sep = 4) |>
+  mutate(across(c(year, month), as.numeric)) |>
+  filter(year >= 1901, month %in% 6:9) |>
+  group_by(year) |>
+  summarise(mean_soi = mean(value, na.rm = TRUE)) |>
+  mutate(
+    phase = case_when(
+      mean_soi >= 7 ~ "lanina",
+      mean_soi <= -7 ~ "elnino",
+      TRUE ~ "neutral")) |>
+  write_csv(here("data", "soi-jjas.csv")) ->
+soi_jjas
+  
+# write out to disk for flourish
+# soi_jjas |>  
+#   mutate(
+#     flourish_map = case_when(
+#       mean_soi >= 7 ~ paste0(year, ": ", "blue"),
+#       mean_soi <= -7 ~ paste0(year, ": ", "red"),
+#       TRUE ~ paste0(year, ": ", "lightgrey"))) |>
+#   pull(flourish_map) |>
+#   paste(collapse = "\n") |> cat()
+```
+
+Let's join the two and visualise by colour. Here's the Southern Peninsula:
+
+```{r}
+#| label: vis-india-soi-rainfall
+india_rainfall |>
+  filter(region == "sthpeninsula") |>
+  select(year, actual_jjas, anomalypct_jjas) |>
+  left_join(soi_jjas, by = join_by(year)) |>
+  ggplot() +
+    aes(x = year, y = anomalypct_jjas, fill = phase) +
+    geom_col() +
+    scale_y_continuous(labels = scales::label_percent(scale = 1)) +
+    scale_fill_manual(values = enso_colours) +
+    theme_minimal() +
+    theme(
+      panel.grid.minor = element_blank(),
+      panel.grid.major.x = element_blank(),
+      legend.position = "top",
+      legend.direction = "horizontal") +
+    labs(
+      fill = NULL, x = NULL, y = "Rainfall anomaly",
+      title = "South Peninsula: annual rainfall")
+```
+
+## Analysis: crop yield
+
+Now let's pull in crop yield data from [ICRISAT](http://data.icrisat.org). This data has columns for each crop _and_ each of three measures:
+
+1. Area (in thousands of hectares),
+2. Productions (in thousands of tons), and
+3. Yield (in kilograms per hectare)
+
+Let's lengthen this a bit so that we can compute on all the dimensions:
+
+```{r}
+#| label: tidy-crops
+here("data", "india-crops-by-district.csv") |>
+  read_csv() |>
+  janitor::clean_names() |>
+  pivot_longer(
+    cols = -c(dist_code, year, state_code, state_name, dist_name),
+    names_to = c("crop", ".value"),
+    names_pattern =
+      "([[:alpha:]]+)_(area_1000_ha|production_1000_tons|yield_kg_per_ha)",
+    values_to = "value") |>
+  mutate(crop = str_to_sentence(crop)) ->
+india_crops
+```
+
+Now that this is tidy, let's start wide, looking at stats across all of India and all crops:
+
+```{r}
+#| label: crops-national
+
+india_crops |>
+  group_by(year) |>
+  summarise(
+    sum_area_1000_ha = sum(area_1000_ha, na.rm = TRUE),
+    sum_production_1000_tons = sum(production_1000_tons, na.rm = TRUE),
+    # yield in kg/ha is (production * 10^6) / (area * 10^3)
+    # (easier than trying to do weighting with the existing figures!)
+    yield_kg_per_ha =
+      (sum_production_1000_tons * 1e6) /
+      (sum_area_1000_ha * 1e6)) ->
+india_national_allcrops
+
+# plot(india_national_allcrops$year, india_national_allcrops$yield_kg_per_ha)
+```
+
+```{r}
+#| label: vis-cropyield-national-allcrops
+india_national_allcrops |>
+  left_join(soi_jjas, by = join_by(year)) |>
+  ggplot() +
+    aes(x = year, y = yield_kg_per_ha) +
+    geom_point(aes(colour = phase)) +
+    geom_smooth(colour = "#eeeeee", se = FALSE) +
+    scale_colour_manual(values = enso_colours) +
+    theme_minimal()
+```
+
+And then two ways: all crops for each region, and each crop for all regions:
+
+```{r}
+#| label: vis-cropyield-byregion-allcrops
+
+india_crops |>
+  group_by(year, state_name) |>
+  summarise(
+    sum_area_1000_ha = sum(area_1000_ha, na.rm = TRUE),
+    sum_production_1000_tons = sum(production_1000_tons, na.rm = TRUE),
+    # yield in kg/ha is (production * 10^6) / (area * 10^3)
+    # (easier than trying to do weighting with the existing figures!)
+    yield_kg_per_ha =
+      (sum_production_1000_tons * 1e6) /
+      (sum_area_1000_ha * 1e6)) |>
+  ungroup() ->
+india_allcrops_bystate
+
+# let's pre-calculate the loess smoother and then regress the errors against
+# enso phase
+
+fit_and_augment_smoother <- function(df) {
+  df |>
+    loess(yield_kg_per_ha ~ year, data = _) |>
+    augment(data = df)
+}
+
+
+india_allcrops_bystate |>
+  left_join(soi_jjas, by = join_by(year)) |>
+  filter(!is.na(yield_kg_per_ha), !is.na(mean_soi)) |>
+  nest(.by = state_name) |>
+  mutate(data = map(data, fit_and_augment_smoother)) |>
+  unnest(data) ->
+india_allcrops_bystate_resid
+
+ggplot(india_allcrops_bystate_resid) +
+  aes(x = state_name, y = .resid) +
+  geom_boxplot(
+    aes(colour = phase, fill = phase),
+    outlier.shape = NA,
+    alpha = 0.25) +
+  geom_point(aes(colour = phase), position = "jitter", alpha = 0.5, size = 0.5) +
+  geom_hline(yintercept = 0) +
+  scale_colour_manual(values = enso_colours) +
+  scale_fill_manual(values = enso_colours) +
+  coord_flip() +
+  theme_minimal() +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_blank(),
+    legend.position = "top", legend.direction = "horizontal") +
+  labs(
+    x = NULL, y = "Residual on predicted crop yield (kg per hectare)",
+    colour = "ENSO phase",
+    fill = "ENSO phase")
+```
+
+The only strong ENSO relationships I'm seeing here are in Andhra Pradesh, Karnataka and Telangana, which are all southern states (which makes sense, given ENSO affects the monsoon and the monsoon brings in rainfall from the ocean). But we're not seeing much in Tamil Nadu and Karala, which are also southern states. Why?
+
+Maybe there's a difference in the types of crops produced in these states. That's the next thing to look at.
