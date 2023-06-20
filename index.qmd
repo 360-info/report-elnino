@@ -7,7 +7,9 @@ format: html
 ```{r}
 #| label: setup
 library(tidyverse)
+library(janitor)
 library(broom)
+library(RColorBrewer)
 library(here)
 
 # consistent colours for enso phases
@@ -22,16 +24,24 @@ enso_colours <- c(
 ```{r}
 #| label: india-rainfall
 
-list.files(here("data", "monsoon"), pattern = glob2rx("*.csv"),
-  full.names = TRUE) |>
-  set_names(x = _) |>
-  map_dfr(read_csv, .id = "path", col_types = "idddddiddddd") |>
-  mutate(
-    region = str_replace_all(
-      basename(path),
-      c("india-rainfall-jjas-" = "", ".csv" = ""))) |>
-  select(year = actual_year, region, everything(), -path, -anomalypct_year) |>
-  write_csv(here("data", "india-rainfall-jjas.csv")) ->
+# list.files(here("data", "monsoon"), pattern = glob2rx("*.csv"),
+#   full.names = TRUE) |>
+#   set_names(x = _) |>
+#   map_dfr(read_csv, .id = "path", col_types = "idddddiddddd") |>
+#   mutate(
+#     region = str_replace_all(
+#       basename(path),
+#       c("india-rainfall-jjas-" = "", ".csv" = ""))) |>
+#   select(year = actual_year, region, everything(), -path, -anomalypct_year) |>
+#   write_csv(here("data", "india-rainfall-jjas.csv")) ->
+# india_rainfall
+
+here("data", "india-rainfall-raw.csv") |>
+  read_csv() |>
+  clean_names() |>
+  rename(region = x1) |>
+  rename_with(str_replace_all, everything(), "jun_sept", "jjas") |>
+  filter(!is.na(region)) ->
 india_rainfall
 
 ```
@@ -41,7 +51,7 @@ india_rainfall
 And here's the average SOI over June–September each year.
 
 ::: {.callout-note}
-There're many ways to classify El Niños! This is just one indicator! But SOI _does_ give us a decent indication of wind activity over that period.
+There're many ways to classify El Niños! This is just one indicator! But SOI _does_ give us some indication of wind activity over that period.
 :::
 
 ```{r}
@@ -78,11 +88,11 @@ Let's join the two and visualise by colour. Here's the Southern Peninsula:
 ```{r}
 #| label: vis-india-soi-rainfall
 india_rainfall |>
-  filter(region == "sthpeninsula") |>
-  select(year, actual_jjas, anomalypct_jjas) |>
+  filter(region == "Peninsular India") |>
+  select(year, actual_rainfall_jjas, departure_percentage_jjas) |>
   left_join(soi_jjas, by = join_by(year)) |>
   ggplot() +
-    aes(x = year, y = anomalypct_jjas, fill = phase) +
+    aes(x = year, y = departure_percentage_jjas, fill = phase) +
     geom_col() +
     scale_y_continuous(labels = scales::label_percent(scale = 1)) +
     scale_fill_manual(values = enso_colours) +
@@ -97,7 +107,7 @@ india_rainfall |>
       title = "South Peninsula: annual rainfall")
 ```
 
-## Analysis: crop yield
+## Analysis: crop yield and ENSO
 
 Now let's pull in crop yield data from [ICRISAT](http://data.icrisat.org). This data has columns for each crop _and_ each of three measures:
 
@@ -154,7 +164,9 @@ india_national_allcrops |>
     theme_minimal()
 ```
 
-And then two ways: all crops for each region, and each crop for all regions:
+### Yield by state
+
+Let's look at this two ways: all crops for each state, and each crop for all states. We'll start looking at each region:
 
 ```{r}
 #| label: vis-cropyield-byregion-allcrops
@@ -215,3 +227,97 @@ ggplot(india_allcrops_bystate_resid) +
 The only strong ENSO relationships I'm seeing here are in Andhra Pradesh, Karnataka and Telangana, which are all southern states (which makes sense, given ENSO affects the monsoon and the monsoon brings in rainfall from the ocean). But we're not seeing much in Tamil Nadu and Karala, which are also southern states. Why?
 
 Maybe there's a difference in the types of crops produced in these states. That's the next thing to look at.
+
+### Crops grown by region
+
+```{r}
+#| label: vis-cropsgrrown-byregion
+
+india_crops |>
+  filter(year == max(year, na.rm = TRUE)) |>
+  group_by(state_name, crop) |>
+  summarise(
+    total_production_1000_tons = sum(production_1000_tons, na.rm = TRUE)) |>
+  ungroup() |>
+  arrange(crop) ->
+crops_by_region
+
+# we need some additional colours for all this crop exploration
+colour_count = length(unique(crops_by_region$crop))
+get_palette = colorRampPalette(brewer.pal(9, "Paired"))
+crop_colours = sample(get_palette(colour_count))
+
+ggplot(crops_by_region) +
+  aes(x = crop, y = total_production_1000_tons, fill = crop) +
+  geom_col() +
+  facet_wrap(vars(state_name), scales = "free_y") +
+  scale_fill_manual(values = crop_colours)
+```
+
+I don't see a simple division between the ENSO-affected regions and the non-affected ones. Maybe it's time to look at the crop/ENSO relationship.
+
+### Yield by crop
+
+```{r}
+#| label: vis-cropyield-bycrop-allstates
+
+india_crops |>
+  group_by(year, crop) |>
+  summarise(
+    sum_area_1000_ha = sum(area_1000_ha, na.rm = TRUE),
+    sum_production_1000_tons = sum(production_1000_tons, na.rm = TRUE),
+    # yield in kg/ha is (production * 10^6) / (area * 10^3)
+    # (easier than trying to do weighting with the existing figures!)
+    yield_kg_per_ha =
+      (sum_production_1000_tons * 1e6) /
+      (sum_area_1000_ha * 1e6)) |>
+  ungroup() ->
+india_national_bycrop
+
+# let's pre-calculate the loess smoother and then regress the errors against
+# enso phase
+
+fit_and_augment_smoother <- function(df) {
+  df |>
+    loess(yield_kg_per_ha ~ year, data = _) |>
+    augment(data = df)
+}
+
+
+india_national_bycrop |>
+  left_join(soi_jjas, by = join_by(year)) |>
+  filter(!is.na(yield_kg_per_ha), !is.na(mean_soi)) |>
+  nest(.by = crop) |>
+  mutate(data = map(data, fit_and_augment_smoother)) |>
+  unnest(data) ->
+india_national_bycrop_resid
+
+ggplot(india_national_bycrop_resid) +
+  aes(x = crop, y = .resid) +
+  geom_boxplot(
+    aes(colour = phase, fill = phase),
+    outlier.shape = NA,
+    alpha = 0.25) +
+  geom_point(aes(colour = phase), position = "jitter", alpha = 0.5, size = 0.5) +
+  geom_hline(yintercept = 0) +
+  facet_wrap(vars(crop), scales = "free") +
+  scale_colour_manual(values = enso_colours) +
+  scale_fill_manual(values = enso_colours) +
+  coord_flip() +
+  theme_minimal() +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_blank(),
+    legend.position = "top", legend.direction = "horizontal",
+    axis.text.x = element_blank()) +
+  labs(
+    x = NULL, y = "Residual on predicted crop yield (kg per hectare)",
+    colour = "ENSO phase",
+    fill = "ENSO phase")
+```
+
+Crops that seem to be most affected by ENSO include Groundnut, Cotton, Pigeonpea, Pulses and Soyabean. Others with a possible but marginal-looking relationship include Maize, Millet, Mustard, Oilseed, Safflower and Rice.
+
+## Analysis: crop yield and rainfall
+
+That said, using SOI directly as a predictor might not be the way to go. It might be helpful to look at rainfall more directly as a predictor and then see the effect of ENSO on top.
