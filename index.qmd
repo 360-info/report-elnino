@@ -23,19 +23,6 @@ enso_colours <- c(
 
 ```{r}
 #| label: india-rainfall
-
-# list.files(here("data", "monsoon"), pattern = glob2rx("*.csv"),
-#   full.names = TRUE) |>
-#   set_names(x = _) |>
-#   map_dfr(read_csv, .id = "path", col_types = "idddddiddddd") |>
-#   mutate(
-#     region = str_replace_all(
-#       basename(path),
-#       c("india-rainfall-jjas-" = "", ".csv" = ""))) |>
-#   select(year = actual_year, region, everything(), -path, -anomalypct_year) |>
-#   write_csv(here("data", "india-rainfall-jjas.csv")) ->
-# india_rainfall
-
 here("data", "india-rainfall-raw.csv") |>
   read_csv() |>
   clean_names() |>
@@ -43,7 +30,6 @@ here("data", "india-rainfall-raw.csv") |>
   rename_with(str_replace_all, everything(), "jun_sept", "jjas") |>
   filter(!is.na(region)) ->
 india_rainfall
-
 ```
 
 ## Analysis: monthly SOI to JJAS SOI
@@ -128,28 +114,80 @@ here("data", "india-crops-by-district.csv") |>
     names_pattern =
       "([[:alpha:]]+)_(area_1000_ha|production_1000_tons|yield_kg_per_ha)",
     values_to = "value") |>
-  mutate(crop = str_to_sentence(crop)) ->
+  mutate(crop = str_to_sentence(crop)) |>
+  mutate(
+    rainfall_region = case_match(state_name,
+      c("Kerala", "Tamil Nadu", "Andhra Pradesh", "Karnataka", "Telangana") ~
+        "Peninsular India",      
+      c("Chhattisgarh", "Gujarat", "Madhya Pradesh", "Maharashtra", "Orissa") ~
+        "Central India",
+      c("Rajasthan", "Uttar Pradesh", "Haryana", "Punjab", "Uttarakhand",
+        "Himachal Pradesh") ~
+        "North West India",
+      c("Assam", "Bihar", "Jharkhand", "West Bengal" ) ~ "North East India")) |>
+  select(year, dist_code, dist_name, state_code, state_name, rainfall_region,
+    crop, everything()) ->
 india_crops
 ```
 
-Now that this is tidy, let's start wide, looking at stats across all of India and all crops:
+### Production by region and crop
+
+Now that this is tidy, let's start wide.
+
+Before we start looking at breakdowns across regions and crops, let's first just find out which regions and crops produce the most (in mass terms!)
+
+```{r}
+#| label: production-by-region
+india_crops |>
+  filter(year %in% 2005:2014) |>
+  group_by(state_name, rainfall_region) |>
+  summarise(total_prod_1000_tons = sum(production_1000_tons, na.rm = TRUE)) |>
+  ungroup() |>
+  mutate(state_name = fct_reorder(state_name, total_prod_1000_tons)) |>
+  ggplot() +
+    aes(x = state_name, y = total_prod_1000_tons, fill = rainfall_region) +
+    geom_col() +
+    coord_flip() +
+    theme_minimal()
+```
+
+Looks like biggest-producing states over 2005-2014 were all Central and North West region states.
+
+How about crops?
+
+```{r}
+#| label: production-by-region
+india_crops |>
+  filter(year %in% 2005:2014) |>
+  group_by(crop) |>
+  summarise(total_prod_1000_tons = sum(production_1000_tons, na.rm = TRUE)) |>
+  mutate(crop = fct_reorder(crop, total_prod_1000_tons)) |>
+  ggplot() +
+    aes(x = crop, y = total_prod_1000_tons) +
+    geom_col() +
+    coord_flip() +
+    theme_minimal()
+```
+
+As expected, rice and wheat are big ones, followed by sugarcane, oilseeds and maize.
+
+### Annual yield (all regions and crops)
+
+:::{.callout-note}
+Yield in kg/ha is `(production * 10^6) / (area in * 10^3)`
+:::
 
 ```{r}
 #| label: crops-national
-
 india_crops |>
   group_by(year) |>
   summarise(
     sum_area_1000_ha = sum(area_1000_ha, na.rm = TRUE),
     sum_production_1000_tons = sum(production_1000_tons, na.rm = TRUE),
-    # yield in kg/ha is (production * 10^6) / (area * 10^3)
-    # (easier than trying to do weighting with the existing figures!)
     yield_kg_per_ha =
       (sum_production_1000_tons * 1e6) /
       (sum_area_1000_ha * 1e6)) ->
 india_national_allcrops
-
-# plot(india_national_allcrops$year, india_national_allcrops$yield_kg_per_ha)
 ```
 
 ```{r}
@@ -161,7 +199,14 @@ india_national_allcrops |>
     geom_point(aes(colour = phase)) +
     geom_smooth(colour = "#eeeeee", se = FALSE) +
     scale_colour_manual(values = enso_colours) +
-    theme_minimal()
+    theme_minimal() +
+    theme(
+      legend.direction = "horizontal",
+      legend.position = "top") +
+    labs(
+      x = NULL, y = "Yield (kg per ha)",
+      title = "Indian national crop yield (all crops)",
+      subtitle = "Highlighted by ENSO phase")
 ```
 
 ### Yield by state
@@ -176,8 +221,6 @@ india_crops |>
   summarise(
     sum_area_1000_ha = sum(area_1000_ha, na.rm = TRUE),
     sum_production_1000_tons = sum(production_1000_tons, na.rm = TRUE),
-    # yield in kg/ha is (production * 10^6) / (area * 10^3)
-    # (easier than trying to do weighting with the existing figures!)
     yield_kg_per_ha =
       (sum_production_1000_tons * 1e6) /
       (sum_area_1000_ha * 1e6)) |>
@@ -192,7 +235,6 @@ fit_and_augment_smoother <- function(df) {
     loess(yield_kg_per_ha ~ year, data = _) |>
     augment(data = df)
 }
-
 
 india_allcrops_bystate |>
   left_join(soi_jjas, by = join_by(year)) |>
@@ -240,14 +282,14 @@ india_crops |>
     total_production_1000_tons = sum(production_1000_tons, na.rm = TRUE)) |>
   ungroup() |>
   arrange(crop) ->
-crops_by_region
+crops_by_region_2022
 
 # we need some additional colours for all this crop exploration
-colour_count = length(unique(crops_by_region$crop))
+colour_count = length(unique(crops_by_region_2022$crop))
 get_palette = colorRampPalette(brewer.pal(9, "Paired"))
 crop_colours = sample(get_palette(colour_count))
 
-ggplot(crops_by_region) +
+ggplot(crops_by_region_2022) +
   aes(x = crop, y = total_production_1000_tons, fill = crop) +
   geom_col() +
   facet_wrap(vars(state_name), scales = "free_y") +
@@ -266,8 +308,6 @@ india_crops |>
   summarise(
     sum_area_1000_ha = sum(area_1000_ha, na.rm = TRUE),
     sum_production_1000_tons = sum(production_1000_tons, na.rm = TRUE),
-    # yield in kg/ha is (production * 10^6) / (area * 10^3)
-    # (easier than trying to do weighting with the existing figures!)
     yield_kg_per_ha =
       (sum_production_1000_tons * 1e6) /
       (sum_area_1000_ha * 1e6)) |>
@@ -321,3 +361,91 @@ Crops that seem to be most affected by ENSO include Groundnut, Cotton, Pigeonpea
 ## Analysis: crop yield and rainfall
 
 That said, using SOI directly as a predictor might not be the way to go. It might be helpful to look at rainfall more directly as a predictor and then see the effect of ENSO on top.
+
+The first thing we'll need to do is match Indian states to rainfall regions (NE, NW, central, peninsular). Then we can join the rainfall and crop yield datasets.
+
+```{r}
+#| label: join-rainfall-crops
+
+# first, summarise by year, state and crop
+india_crops |>
+  group_by(year, state_name, crop) |>
+  summarise(
+    sum_area_1000_ha = sum(area_1000_ha, na.rm = TRUE),
+    sum_production_1000_tons = sum(production_1000_tons, na.rm = TRUE),
+    yield_kg_per_ha =
+      (sum_production_1000_tons * 1e6) /
+      (sum_area_1000_ha * 1e6)) |>
+  ungroup() ->
+india_states_crops
+
+# categorise states by rainfall region
+# (map from zheng et al. 2016: https://doi.org/10.1002/2016JD025135
+india_states_crops |>
+  mutate(
+    rainfall_region = case_match(state_name,
+      c("Kerala", "Tamil Nadu", "Andhra Pradesh", "Karnataka", "Telangana") ~
+        "Peninsular India",      
+      c("Chhattisgarh", "Gujarat", "Madhya Pradesh", "Maharashtra", "Orissa") ~
+        "Central India",
+      c("Rajasthan", "Uttar Pradesh", "Haryana", "Punjab", "Uttarakhand",
+        "Himachal Pradesh") ~
+        "North West India",
+      c("Assam", "Bihar", "Jharkhand", "West Bengal" ) ~ "North East India")) |>
+  select(year, state_name, rainfall_region, everything()) |>
+  group_by(year, rainfall_region, crop) |>
+  summarise(
+    total_area_1000_ha = sum(sum_area_1000_ha, na.rm = TRUE),
+    total_production_1000_tons = sum(sum_production_1000_tons, na.rm = TRUE),
+    yield_kg_per_ha =
+      (total_production_1000_tons * 1e6) /
+      (total_area_1000_ha * 1e6)) |>
+  ungroup() ->
+india_regions_crops
+
+# now join rainfall and crop yield
+india_regions_crops |>
+  left_join(india_rainfall,
+    by = join_by(year == year, rainfall_region == region),
+    multiple = "all",
+    relationship = "many-to-one") ->
+india_regions_all
+
+fit_and_augment_smoother <- function(df) {
+  df |>
+    loess(yield_kg_per_ha ~ year, data = _) |>
+    augment(data = df)
+}
+
+# fit a loess and get the yield residuals
+india_regions_all |>
+  filter(!is.na(yield_kg_per_ha), !is.na(year),
+    is.finite(year), is.finite(yield_kg_per_ha)) |>
+  nest(.by = c(crop, rainfall_region)) |>
+  mutate(data = map(data, fit_and_augment_smoother)) |>
+  unnest(data) |>
+  rename(yield_fitted = .fitted, yield_resid = .resid) |>
+  write_csv() ->
+india_regions_all_resid
+
+# now visualise rainfall against residuals
+ggplot(india_regions_all_resid) +
+  aes(x = departure_percentage_jjas, y = yield_resid) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  geom_point() +
+  facet_grid(rows = vars(crop), cols = vars(rainfall_region), scales = "free") +
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = "white")
+  ) ->
+region_crop_rainfall_plot
+
+ggsave(
+  here("out", "region_crop_rainfall_plot.png"),
+  region_crop_rainfall_plot,
+  height = 7200, width = 1200, units = "px")
+```
+
+It still looks like the stronger relationship here is with certain crops rather than certain regions, but let's break it down by both.
+
