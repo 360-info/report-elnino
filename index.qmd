@@ -90,7 +90,7 @@ india_rainfall |>
       legend.direction = "horizontal") +
     labs(
       fill = NULL, x = NULL, y = "Rainfall anomaly",
-      title = "South Peninsula: annual rainfall")
+      title = "South Peninsula: annual June–September rainfall")
 ```
 
 ## Analysis: crop yield and ENSO
@@ -101,7 +101,7 @@ Now let's pull in crop yield data from [ICRISAT](http://data.icrisat.org). This 
 2. Productions (in thousands of tons), and
 3. Yield (in kilograms per hectare)
 
-Let's lengthen this a bit so that we can compute on all the dimensions:
+Let's lengthen this a bit so that we can compute on all the dimensions, and we'll classify the states according to the rainfall region that they're in:
 
 ```{r}
 #| label: tidy-crops
@@ -156,7 +156,7 @@ Looks like biggest-producing states over 2005-2014 were all Central and North We
 How about crops?
 
 ```{r}
-#| label: production-by-region
+#| label: production-by-crop
 india_crops |>
   filter(year %in% 2005:2014) |>
   group_by(crop) |>
@@ -170,6 +170,8 @@ india_crops |>
 ```
 
 As expected, rice and wheat are big ones, followed by sugarcane, oilseeds and maize.
+
+We probably want to focus on [_kharif_ crops](), which are ones grown during the monsoon season that are dependent on good rain. Rice and maize are both major kharif crops, but wheat is not—it's a _rabi_ crop, grown in the winter.
 
 ### Annual yield (all regions and crops)
 
@@ -209,15 +211,19 @@ india_national_allcrops |>
       subtitle = "Highlighted by ENSO phase")
 ```
 
-### Yield by state
+We can see that yield has increased steadily over time (likely thanks to technological improvements), but you can see a bit of year-to-year variation.
 
-Let's look at this two ways: all crops for each state, and each crop for all states. We'll start looking at each region:
+There's a lot of noise here, as we're looking at parts of India and crops that are less dependent on rainfall.
+
+### Yield by region
+
+Let's look at this two ways: all crops for each region, and each crop for all regions. We'll start looking at each region:
 
 ```{r}
 #| label: vis-cropyield-byregion-allcrops
 
 india_crops |>
-  group_by(year, state_name) |>
+  group_by(year, rainfall_region) |>
   summarise(
     sum_area_1000_ha = sum(area_1000_ha, na.rm = TRUE),
     sum_production_1000_tons = sum(production_1000_tons, na.rm = TRUE),
@@ -225,7 +231,56 @@ india_crops |>
       (sum_production_1000_tons * 1e6) /
       (sum_area_1000_ha * 1e6)) |>
   ungroup() ->
-india_allcrops_bystate
+india_allcrops_byregion
+
+india_allcrops_byregion |>
+  left_join(soi_jjas, by = join_by(year)) |>
+  ggplot() +
+    aes(x = year, y = yield_kg_per_ha) +
+    geom_line(colour = "#eeeeee", linewidth = 0.5) +
+    geom_point(aes(colour = phase)) +
+    geom_smooth(colour = "#dddddd", se = FALSE) +
+    facet_wrap(vars(rainfall_region)) +
+    scale_colour_manual(values = enso_colours) +
+    theme_minimal() +
+    theme(
+      legend.direction = "horizontal",
+      legend.position = "top") +
+    labs(
+      x = NULL, y = "Yield (kg per ha)",
+      title = "Indian national crop yield (all crops)",
+      subtitle = "Highlighted by ENSO phase")
+```
+
+It's interesting to see that yield variability has increased substantially in the last 20 years, particularly in Peninsular India.
+
+```{r}
+#| label: vis-cropyield-peninsular
+
+# let's focus on peninsular india
+india_allcrops_byregion |>
+  left_join(soi_jjas, by = join_by(year)) |>
+  filter(rainfall_region == "Peninsular India") |>
+  ggplot() +
+    aes(x = year, y = yield_kg_per_ha) +
+    geom_line(colour = "#eeeeee", linewidth = 0.5) +
+    geom_point(aes(colour = phase)) +
+    geom_smooth(colour = "#eeeeee", se = FALSE) +
+    scale_colour_manual(values = enso_colours) +
+    theme_minimal() +
+    theme(
+      legend.direction = "horizontal",
+      legend.position = "top",
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.x = element_blank()) +
+    labs(
+      x = NULL, y = "Yield (kg per ha)",
+      title = "Crop yield in Peninsular India (all crops)",
+      subtitle = "Highlighted by ENSO phase")
+```
+
+```{r}
+#| label: vis-cropyield-byregion-allcrops-resid
 
 # let's pre-calculate the loess smoother and then regress the errors against
 # enso phase
@@ -236,16 +291,16 @@ fit_and_augment_smoother <- function(df) {
     augment(data = df)
 }
 
-india_allcrops_bystate |>
+india_allcrops_byregion |>
   left_join(soi_jjas, by = join_by(year)) |>
   filter(!is.na(yield_kg_per_ha), !is.na(mean_soi)) |>
-  nest(.by = state_name) |>
+  nest(.by = rainfall_region) |>
   mutate(data = map(data, fit_and_augment_smoother)) |>
   unnest(data) ->
-india_allcrops_bystate_resid
+india_allcrops_byregion_resid
 
-ggplot(india_allcrops_bystate_resid) +
-  aes(x = state_name, y = .resid) +
+ggplot(india_allcrops_byregion_resid) +
+  aes(x = rainfall_region, y = .resid) +
   geom_boxplot(
     aes(colour = phase, fill = phase),
     outlier.shape = NA,
@@ -266,9 +321,7 @@ ggplot(india_allcrops_bystate_resid) +
     fill = "ENSO phase")
 ```
 
-The only strong ENSO relationships I'm seeing here are in Andhra Pradesh, Karnataka and Telangana, which are all southern states (which makes sense, given ENSO affects the monsoon and the monsoon brings in rainfall from the ocean). But we're not seeing much in Tamil Nadu and Karala, which are also southern states. Why?
-
-Maybe there's a difference in the types of crops produced in these states. That's the next thing to look at.
+The strong relationship here in Peninsular India, with a weaker relationship in Central India.
 
 ### Crops grown by region
 
@@ -277,7 +330,7 @@ Maybe there's a difference in the types of crops produced in these states. That'
 
 india_crops |>
   filter(year == max(year, na.rm = TRUE)) |>
-  group_by(state_name, crop) |>
+  group_by(rainfall_region, crop) |>
   summarise(
     total_production_1000_tons = sum(production_1000_tons, na.rm = TRUE)) |>
   ungroup() |>
@@ -292,11 +345,22 @@ crop_colours = sample(get_palette(colour_count))
 ggplot(crops_by_region_2022) +
   aes(x = crop, y = total_production_1000_tons, fill = crop) +
   geom_col() +
-  facet_wrap(vars(state_name), scales = "free_y") +
-  scale_fill_manual(values = crop_colours)
+  facet_wrap(vars(rainfall_region), scales = "free_y") +
+  scale_fill_manual(values = crop_colours) +
+  scale_y_continuous(expand = expansion()) +
+  coord_flip() +
+  theme_minimal() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
 ```
 
-I don't see a simple division between the ENSO-affected regions and the non-affected ones. Maybe it's time to look at the crop/ENSO relationship.
+Rice is a major crop in all four regions—Peninsular India contributed around 25 million tonnes in 2022 (about 20% of the national total).
+
+Maize is another crop grown in this season, and Peninsular India is a major grower—about 13 million tonnes (about 40% of the national total).
+
+The other big crops in 
 
 ### Yield by crop
 
@@ -322,7 +386,6 @@ fit_and_augment_smoother <- function(df) {
     loess(yield_kg_per_ha ~ year, data = _) |>
     augment(data = df)
 }
-
 
 india_national_bycrop |>
   left_join(soi_jjas, by = join_by(year)) |>
@@ -424,8 +487,7 @@ india_regions_all |>
   nest(.by = c(crop, rainfall_region)) |>
   mutate(data = map(data, fit_and_augment_smoother)) |>
   unnest(data) |>
-  rename(yield_fitted = .fitted, yield_resid = .resid) |>
-  write_csv() ->
+  rename(yield_fitted = .fitted, yield_resid = .resid) ->
 india_regions_all_resid
 
 # now visualise rainfall against residuals
@@ -448,4 +510,3 @@ ggsave(
 ```
 
 It still looks like the stronger relationship here is with certain crops rather than certain regions, but let's break it down by both.
-
