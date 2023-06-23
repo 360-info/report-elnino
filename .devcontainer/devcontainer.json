@@ -31,9 +31,8 @@
 		},
 	},
 
-	/* Use 'postCreateCommand' to run commands after the container is created.
-	  (for example, install some R packages or system dependencies) */
-	// "postCreateCommand": "",
+	// add bundled fonts
+	"postCreateCommand": "cp .devcontainer/fonts/* /usr/local/share/fonts"
 
 	/* Use 'forwardPorts' to make a list of ports inside the container available
 	   locally. */
