@@ -54,15 +54,6 @@
 </script>
 ```
 :::
-
-<!-- if there's room here, put credits on two lines:
-  * Editor names, 360info (hint: put &shy; in the middle of long names!)
-  * Data: ORG
-  (if there isn't room, put it in the ABOUT dialog) -->
-James Goldie, 360info
-
-Data: IRENA
-
 ::::
 
 <!-- finally, here's the EDITOR SHARE button. it's a quick way to copy the
