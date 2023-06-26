@@ -1,7 +1,8 @@
 ---
 # title: Global climate drivers
 format:
-  360-embed-html: default
+  360-embed-html:
+    css: svgmap.css
 resources:
   - worldmap-interactive-test.svg
 360embed:
@@ -15,6 +16,18 @@ resources:
 
 {{< include _popup-buttons.qmd >}}
 
+```{=html}
+<style>
+  /* .hidden {
+    opacity: 0;
+  }
+
+  .deemphasised {
+    opacity: 0.25;
+  } */
+</style>
+```
+
 ```{ojs}
 mapGraphic = {
   
@@ -26,15 +39,15 @@ mapGraphic = {
   const svg = d3.select(svgDoc.documentElement).remove();
 
   // TODO - inject some classes?
-  svg.insert("svg:style").text(`
-  .hidden {
-    opacity: 0;
-  }
+  // svg.insert("svg:style").text(`
+  // .hidden {
+  //   opacity: 0;
+  // }
 
-  .deemphasised {
-    opacity: 0.25;
-  }
-  `)
+  // .deemphasised {
+  //   opacity: 0.25;
+  // }
+  // `)
 
   // helper functions to show and hide things
   const hideSelection = (selection) =>

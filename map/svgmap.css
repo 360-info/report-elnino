@@ -1,0 +1,9 @@
+/* classes used to style components of the svg map in various states */
+
+.hidden {
+  opacity: 0;
+}
+
+.deemphasised {
+  opacity: 0.25;
+}
