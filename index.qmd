@@ -14,10 +14,146 @@ library(here)
 
 # consistent colours for enso phases
 enso_colours <- c(
-  "lanina" = "#3333bb",
+  "lanina" = "#5555bb",
   "neutral" = "lightgrey",
-  "elnino" = "#dd3333")
+  "elnino" = "#dd3333",
+  disagree = "#333333")
 ```
+
+## Analysis: ways of measuring El Niño
+
+For a few of these charts, we're going to compare outcomes with an indicator measuring ENSO phase (El Niño, neutral or La Niña). But as ENSO is a phenomenon of both the atmosphere and the ocean, there're a few ways to measure it. We're going to compare those to see if it makes a lot of difference to our classifications.
+
+On the ocean side, the NINO34 index—also called the Oceanic Nino Index (ONI)—defines sea surface temperatures in the mid-eastern Pacific. An anomaly in that area from the long term average of at least +0.5°C defines an El Niño, while lower than -0.5°C defines a La Niña.
+
+On the atmospheric side, the Southern Oscillation Index (SOI) compares the air pressure difference between Tahiti and Darwin. An SOI below -8 for an extended period defines an El Niño; an SOI above +8 defines a La Niña.
+
+ONI is NOAA's primary index for El Ni˜no measurement, but the Australian Bureau of Meteorology typically looks at both (as well as dynamical factors and seasonal forecast models) to make the call.
+
+Let's load data in for both and compare.
+
+```{r}
+#| label: import-nino34
+
+# import nino3.4 data anad lengthen by month, filtering out the flagged nas
+here("data", "nasa-nino34-anomaly-monthly.txt") |>
+  read_table(skip = 1, col_names = c("year", paste0("month", 1:12)),
+    col_types = "idddddddddddd") |>
+  head(-7) |>
+  pivot_longer(-year, names_to = "month", values_to = "nino34",
+    names_pattern = "month(\\d{1,2})") |>
+  mutate(
+    month = as.numeric(month),
+    nino34 = if_else(between(nino34, -20, 20), nino34, NA_real_)) ->
+nino34
+
+# let's calculate the average for june-sep each year
+nino34 |>
+  filter(month %in% 6:9) |>
+  group_by(year) |>
+  summarise(mean_nino34 = mean(nino34, na.rm = TRUE)) |>
+  mutate(
+    phase_nino34 = case_when(
+      mean_nino34 <= -0.5 ~ "lanina",
+      mean_nino34 >= 0.5 ~ "elnino",
+      TRUE ~ "neutral")) ->
+nino34_jjas
+```
+
+And here's SOI over June-Sep each year:
+
+```{r}
+#| label: import-soi
+
+here("data", "soi-monthly-raw.csv") |>
+  read_csv(col_names = c("year_month", "soi")) |>
+  separate(year_month, into = c("year", "month"), sep = 4) |>
+  mutate(across(c(year, month), as.numeric)) |>
+  filter(year >= 1901) ->
+soi
+
+soi |>
+  filter(month %in% 6:9) |>
+  group_by(year) |>
+  summarise(mean_soi = mean(soi, na.rm = TRUE)) |>
+  mutate(
+    phase_soi = case_when(
+      mean_soi >= 7 ~ "lanina",
+      mean_soi <= -7 ~ "elnino",
+      TRUE ~ "neutral")) |>
+  write_csv(here("data", "soi-jjas.csv")) ->
+soi_jjas
+```
+
+Now we can join and compare the two:
+
+```{r}
+#| label: compare-soi-nino34
+
+nino34 |>
+  inner_join(soi, join_by(year == year, month == month),
+    relationship = "one-to-one") |>
+  mutate(
+    phase_soi = case_when(
+      soi >= 7 ~ "lanina",
+      soi <= -7 ~ "elnino",
+      TRUE ~ "neutral"),
+    phase_nino34 = case_when(
+      nino34 <= -0.5 ~ "lanina",
+      nino34 >= 0.5 ~ "elnino",
+      TRUE ~ "neutral"),
+    phase_either = case_when(
+      phase_nino34 == "elnino" & phase_soi == "lanina" |
+        phase_nino34 == "lanina" & phase_soi == "elnino" ~ "disagree",
+      phase_nino34 == "neutral" & phase_soi == "neutral" ~ "neutral",
+      phase_nino34 == "elnino" ~ "elnino",
+      phase_soi == "elnino" ~ "elnino",
+      phase_nino34 == "lanina" ~ "lanina",
+      phase_soi == "lanina" ~ "lanina",
+      TRUE ~ NA_character_),
+    phase_both = case_when(
+      phase_nino34 == "elnino" & phase_soi == "lanina" |
+        phase_nino34 == "lanina" & phase_soi == "elnino" ~ "disagree",
+      phase_nino34 == "neutral" & phase_soi == "neutral" ~ "neutral",
+      phase_nino34 == "elnino" ~ "elnino",
+      phase_soi == "elnino" ~ "elnino",
+      phase_nino34 == "lanina" ~ "lanina",
+      phase_soi == "lanina" ~ "lanina",
+      TRUE ~ NA_character_),
+      
+      ) |>
+  write_csv(here("data", "enso-indicators-monthly.csv")) ->
+enso
+
+# lengthen and plot
+enso |>
+  select(year, month, starts_with("phase")) |>
+  pivot_longer(starts_with("phase"), names_pattern = "phase_(nino34|soi|either)",
+    names_to = "indicator", values_to = "phase") |>
+  mutate(date = ymd(paste0(year, month, "-01"))) |>
+  ggplot() +
+    aes(x = date, y = indicator, fill = phase) +
+    geom_tile(colour = "#111111") +
+    scale_fill_manual(values = enso_colours) +
+    scale_x_date(date_breaks = "5 years", date_labels = "%Y") +
+    theme_minimal() +
+    theme(legend.position = "top", legend.direction = "horizontal") ->
+enso_plot
+
+enso_plot |>
+  ggsave(here("out", "enso-indicators.png"), plot = _,
+    height = 400, width = 1800, units = "px", scale = 4, bg = "white")
+
+# el nino/la nina years according to both indicators?
+enso_jjas |>
+  filter(phasexrx_both %in% c("elnio", "lanina")) |>
+  select(year, phase_both) |>
+  print(n = Inf)
+```
+
+When we demand that both indicators agree on a phase, we get a subset of the years manually indicated as an El Niño or La Niña by the Bureau of Meteorology. That could be because our indicators are focusing on June–September (partly because we're interested in kharif crops later in this analysis), where some ENSO events might develop later (or maybe one of the ocean or atmosphere began later than the other).
+
+If we go with at least one of the indicators in a phase (provided the two don't disagree with opposite phases), we get a list more consistent with the BOM.
 
 ## Analysis: Indian rainfall and ENSO
 
@@ -33,41 +169,6 @@ india_rainfall
 ```
 
 ## Analysis: monthly SOI to JJAS SOI
-
-And here's the average SOI over June–September each year.
-
-::: {.callout-note}
-There're many ways to classify El Niños! This is just one indicator! But SOI _does_ give us some indication of wind activity over that period.
-:::
-
-```{r}
-#| label: tidy-soi
-#| 
-here("data", "soi-monthly-raw.csv") |>
-  read_csv(col_names = c("year_month", "value")) |>
-  separate(year_month, into = c("year", "month"), sep = 4) |>
-  mutate(across(c(year, month), as.numeric)) |>
-  filter(year >= 1901, month %in% 6:9) |>
-  group_by(year) |>
-  summarise(mean_soi = mean(value, na.rm = TRUE)) |>
-  mutate(
-    phase = case_when(
-      mean_soi >= 7 ~ "lanina",
-      mean_soi <= -7 ~ "elnino",
-      TRUE ~ "neutral")) |>
-  write_csv(here("data", "soi-jjas.csv")) ->
-soi_jjas
-  
-# write out to disk for flourish
-# soi_jjas |>  
-#   mutate(
-#     flourish_map = case_when(
-#       mean_soi >= 7 ~ paste0(year, ": ", "blue"),
-#       mean_soi <= -7 ~ paste0(year, ": ", "red"),
-#       TRUE ~ paste0(year, ": ", "lightgrey"))) |>
-#   pull(flourish_map) |>
-#   paste(collapse = "\n") |> cat()
-```
 
 Let's join the two and visualise by colour. Here's the Southern Peninsula:
 
@@ -255,12 +356,21 @@ india_allcrops_byregion |>
 It's interesting to see that yield variability has increased substantially in the last 20 years, particularly in Peninsular India.
 
 ```{r}
-#| label: vis-cropyield-peninsular
+#| label: vis-cropyield-peninsular-ricemaize
 
-# let's focus on peninsular india
-india_allcrops_byregion |>
+india_crops |>
+  filter(
+    crop %in% c("Rice", "Maize"),
+    rainfall_region == "Peninsular India") |>
+  group_by(year) |>
+  summarise(
+    sum_area_1000_ha = sum(area_1000_ha, na.rm = TRUE),
+    sum_production_1000_tons = sum(production_1000_tons, na.rm = TRUE),
+    yield_kg_per_ha =
+      (sum_production_1000_tons * 1e6) /
+      (sum_area_1000_ha * 1e6)) |>
+  ungroup() |>
   left_join(soi_jjas, by = join_by(year)) |>
-  filter(rainfall_region == "Peninsular India") |>
   ggplot() +
     aes(x = year, y = yield_kg_per_ha) +
     geom_line(colour = "#eeeeee", linewidth = 0.5) +
@@ -275,7 +385,7 @@ india_allcrops_byregion |>
       panel.grid.minor.x = element_blank()) +
     labs(
       x = NULL, y = "Yield (kg per ha)",
-      title = "Crop yield in Peninsular India (all crops)",
+      title = "Rice and maize yield in Peninsular India",
       subtitle = "Highlighted by ENSO phase")
 ```
 
@@ -432,37 +542,13 @@ The first thing we'll need to do is match Indian states to rainfall regions (NE,
 
 # first, summarise by year, state and crop
 india_crops |>
-  group_by(year, state_name, crop) |>
+  group_by(year, rainfall_region, crop) |>
   summarise(
     sum_area_1000_ha = sum(area_1000_ha, na.rm = TRUE),
     sum_production_1000_tons = sum(production_1000_tons, na.rm = TRUE),
     yield_kg_per_ha =
       (sum_production_1000_tons * 1e6) /
       (sum_area_1000_ha * 1e6)) |>
-  ungroup() ->
-india_states_crops
-
-# categorise states by rainfall region
-# (map from zheng et al. 2016: https://doi.org/10.1002/2016JD025135
-india_states_crops |>
-  mutate(
-    rainfall_region = case_match(state_name,
-      c("Kerala", "Tamil Nadu", "Andhra Pradesh", "Karnataka", "Telangana") ~
-        "Peninsular India",      
-      c("Chhattisgarh", "Gujarat", "Madhya Pradesh", "Maharashtra", "Orissa") ~
-        "Central India",
-      c("Rajasthan", "Uttar Pradesh", "Haryana", "Punjab", "Uttarakhand",
-        "Himachal Pradesh") ~
-        "North West India",
-      c("Assam", "Bihar", "Jharkhand", "West Bengal" ) ~ "North East India")) |>
-  select(year, state_name, rainfall_region, everything()) |>
-  group_by(year, rainfall_region, crop) |>
-  summarise(
-    total_area_1000_ha = sum(sum_area_1000_ha, na.rm = TRUE),
-    total_production_1000_tons = sum(sum_production_1000_tons, na.rm = TRUE),
-    yield_kg_per_ha =
-      (total_production_1000_tons * 1e6) /
-      (total_area_1000_ha * 1e6)) |>
   ungroup() ->
 india_regions_crops
 
@@ -510,3 +596,93 @@ ggsave(
 ```
 
 It still looks like the stronger relationship here is with certain crops rather than certain regions, but let's break it down by both.
+
+```{r}
+#| label: rainfall-crops-peninsular-kharif
+india_regions_all_resid |>
+  filter(
+    rainfall_region == "Peninsular India",
+    crop %in% c("Rice", "Maize", "Groundnut", "Linseed", "Soybean")) |>
+  left_join(soi_jjas, by = join_by(year)) ->
+peninsula_kharif
+
+ggplot(peninsula_kharif) +
+  aes(x = departure_percentage_jjas, y = yield_resid) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  geom_point(aes(colour = phase)) +
+  facet_wrap(vars(crop), scales = "free") +
+  scale_colour_manual(values = enso_colours) +
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = "white")
+  ) ->
+peninsular_kharifcrop_rainfall_plot
+
+ggsave(
+  here("out", "peninsular_kharifcrop_rainfall_plot.png"),
+  peninsular_kharifcrop_rainfall_plot,
+  height = 2400, width = 1200, units = "px")
+    
+```
+
+## Analysis: ENSO and global and national temperatures
+
+Here, global and national temperatures are courtesy of [Berkeley Earth](https://berkeleyearth.org/data/). They have generously agreed to licence the data here under [Creative Commons Attribution (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
+
+Let's start with global temperature data:
+
+```{r}
+#| label: import-temperature-global
+
+here( "data", "berkeley-monthly-tavg-global.txt") |>
+  read_table(
+    col_names = c(
+      "year", "month",
+      "anom_monthly", "unc_monthly",
+      "anom_annual",  "unc_annual",
+      "anom_5yr",     "unc_5yr",
+      "anom_10yr",    "unc_10yr",
+      "anom_20yr",    "unc_20yr"),
+    col_types = "iidddddddddd",
+    comment = "%",
+    na = c("NA", "NaN")) |>
+  slice(-1) ->
+temp_monthly
+```
+
+Let's join it to the Nino3.4, which we have monthly across the whole year. But we might need a smoother on those first.
+
+```{r}
+#| label: smooth-nino34
+nino34 |>
+  mutate(nino34_3mth = (nino34 + lead(nino34) + lag(nino34)) / 3) ->
+nino34_smooth
+```
+
+```{r}
+#| label: join-temperature-enso
+temp_monthly |>
+  inner_join(nino34_smooth, join_by(year == year, month == month)) |>
+  mutate(
+    date = ymd(paste(year, month, "01")),
+    phase_nino34 = case_when(
+      nino34_3mth <= -0.5 ~ "lanina",
+      nino34_3mth >= 0.5 ~ "elnino",
+      TRUE ~ "neutral")) |>
+  filter(date >= as.Date("1900-01-01")) ->
+temp_toplot
+
+ggplot(temp_toplot) +
+  aes(x = date) +
+  geom_linerange(
+    aes(ymin = anom_annual, ymax = anom_5yr, colour = phase_nino34)) +
+  geom_line(aes(y = anom_5yr), colour = "black") +
+  geom_point(
+    aes(y = anom_annual, colour = phase_nino34),
+    data = temp_toplot |> filter(is.na(anom_5yr), !is.na(anom_annual)),
+    size = 0.25) +
+  scale_colour_manual(values = enso_colours) +
+  theme_minimal()
+
+```
