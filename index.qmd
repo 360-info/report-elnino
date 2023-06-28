@@ -1,22 +1,28 @@
 ---
 title: "El Niño"
 author: "James Goldie"
-format: html
+format: sverto-html
 ---
 
+:::{}
+{{< include /.sverto/index.qmd >}}
+:::
+
 ```{r}
-#| label: setup
+
 library(tidyverse)
+library(themes360info)
 library(janitor)
 library(broom)
+library(glue)
 library(RColorBrewer)
 library(here)
 
 # consistent colours for enso phases
 enso_colours <- c(
-  "lanina" = "#5555bb",
-  "neutral" = "lightgrey",
-  "elnino" = "#dd3333",
+  lanina = "#5555bb",
+  neutral = "lightgrey",
+  elnino = "#dd3333",
   disagree = "#333333")
 ```
 
@@ -30,10 +36,10 @@ On the atmospheric side, the Southern Oscillation Index (SOI) compares the air p
 
 ONI is NOAA's primary index for El Ni˜no measurement, but the Australian Bureau of Meteorology typically looks at both (as well as dynamical factors and seasonal forecast models) to make the call.
 
-Let's load data in for both and compare.
+Let's load data in for both and compare. Nino3.4 comes from the [NASA Physical Sciences Laboratory](https://psl.noaa.gov/gcos_wgsp/Timeseries/Nino34/):
 
 ```{r}
-#| label: import-nino34
+
 
 # import nino3.4 data anad lengthen by month, filtering out the flagged nas
 here("data", "nasa-nino34-anomaly-monthly.txt") |>
@@ -63,7 +69,7 @@ nino34_jjas
 And here's SOI over June-Sep each year:
 
 ```{r}
-#| label: import-soi
+
 
 here("data", "soi-monthly-raw.csv") |>
   read_csv(col_names = c("year_month", "soi")) |>
@@ -88,7 +94,7 @@ soi_jjas
 Now we can join and compare the two:
 
 ```{r}
-#| label: compare-soi-nino34
+
 
 nino34 |>
   inner_join(soi, join_by(year == year, month == month),
@@ -119,9 +125,7 @@ nino34 |>
       phase_soi == "elnino" ~ "elnino",
       phase_nino34 == "lanina" ~ "lanina",
       phase_soi == "lanina" ~ "lanina",
-      TRUE ~ NA_character_),
-      
-      ) |>
+      TRUE ~ NA_character_)) |>
   write_csv(here("data", "enso-indicators-monthly.csv")) ->
 enso
 
@@ -136,7 +140,7 @@ enso |>
     geom_tile(colour = "#111111") +
     scale_fill_manual(values = enso_colours) +
     scale_x_date(date_breaks = "5 years", date_labels = "%Y") +
-    theme_minimal() +
+    theme_360() +
     theme(legend.position = "top", legend.direction = "horizontal") ->
 enso_plot
 
@@ -145,10 +149,10 @@ enso_plot |>
     height = 400, width = 1800, units = "px", scale = 4, bg = "white")
 
 # el nino/la nina years according to both indicators?
-enso_jjas |>
-  filter(phasexrx_both %in% c("elnio", "lanina")) |>
-  select(year, phase_both) |>
-  print(n = Inf)
+# enso |>
+#   filter(phase_both %in% c("elnio", "lanina")) |>
+#   select(year, phase_both) |>
+#   print(n = Inf)
 ```
 
 When we demand that both indicators agree on a phase, we get a subset of the years manually indicated as an El Niño or La Niña by the Bureau of Meteorology. That could be because our indicators are focusing on June–September (partly because we're interested in kharif crops later in this analysis), where some ENSO events might develop later (or maybe one of the ocean or atmosphere began later than the other).
@@ -158,7 +162,7 @@ If we go with at least one of the indicators in a phase (provided the two don't 
 ## Analysis: Indian rainfall and ENSO
 
 ```{r}
-#| label: india-rainfall
+
 here("data", "india-rainfall-raw.csv") |>
   read_csv() |>
   clean_names() |>
@@ -173,13 +177,13 @@ india_rainfall
 Let's join the two and visualise by colour. Here's the Southern Peninsula:
 
 ```{r}
-#| label: vis-india-soi-rainfall
+
 india_rainfall |>
   filter(region == "Peninsular India") |>
   select(year, actual_rainfall_jjas, departure_percentage_jjas) |>
   left_join(soi_jjas, by = join_by(year)) |>
   ggplot() +
-    aes(x = year, y = departure_percentage_jjas, fill = phase) +
+    aes(x = year, y = departure_percentage_jjas, fill = phase_soi) +
     geom_col() +
     scale_y_continuous(labels = scales::label_percent(scale = 1)) +
     scale_fill_manual(values = enso_colours) +
@@ -205,7 +209,7 @@ Now let's pull in crop yield data from [ICRISAT](http://data.icrisat.org). This 
 Let's lengthen this a bit so that we can compute on all the dimensions, and we'll classify the states according to the rainfall region that they're in:
 
 ```{r}
-#| label: tidy-crops
+
 here("data", "india-crops-by-district.csv") |>
   read_csv() |>
   janitor::clean_names() |>
@@ -238,7 +242,7 @@ Now that this is tidy, let's start wide.
 Before we start looking at breakdowns across regions and crops, let's first just find out which regions and crops produce the most (in mass terms!)
 
 ```{r}
-#| label: production-by-region
+
 india_crops |>
   filter(year %in% 2005:2014) |>
   group_by(state_name, rainfall_region) |>
@@ -257,7 +261,7 @@ Looks like biggest-producing states over 2005-2014 were all Central and North We
 How about crops?
 
 ```{r}
-#| label: production-by-crop
+
 india_crops |>
   filter(year %in% 2005:2014) |>
   group_by(crop) |>
@@ -281,7 +285,7 @@ Yield in kg/ha is `(production * 10^6) / (area in * 10^3)`
 :::
 
 ```{r}
-#| label: crops-national
+
 india_crops |>
   group_by(year) |>
   summarise(
@@ -294,12 +298,12 @@ india_national_allcrops
 ```
 
 ```{r}
-#| label: vis-cropyield-national-allcrops
+
 india_national_allcrops |>
   left_join(soi_jjas, by = join_by(year)) |>
   ggplot() +
     aes(x = year, y = yield_kg_per_ha) +
-    geom_point(aes(colour = phase)) +
+    geom_point(aes(colour = phase_soi)) +
     geom_smooth(colour = "#eeeeee", se = FALSE) +
     scale_colour_manual(values = enso_colours) +
     theme_minimal() +
@@ -321,7 +325,7 @@ There's a lot of noise here, as we're looking at parts of India and crops that a
 Let's look at this two ways: all crops for each region, and each crop for all regions. We'll start looking at each region:
 
 ```{r}
-#| label: vis-cropyield-byregion-allcrops
+
 
 india_crops |>
   group_by(year, rainfall_region) |>
@@ -339,7 +343,7 @@ india_allcrops_byregion |>
   ggplot() +
     aes(x = year, y = yield_kg_per_ha) +
     geom_line(colour = "#eeeeee", linewidth = 0.5) +
-    geom_point(aes(colour = phase)) +
+    geom_point(aes(colour = phase_soi)) +
     geom_smooth(colour = "#dddddd", se = FALSE) +
     facet_wrap(vars(rainfall_region)) +
     scale_colour_manual(values = enso_colours) +
@@ -356,7 +360,7 @@ india_allcrops_byregion |>
 It's interesting to see that yield variability has increased substantially in the last 20 years, particularly in Peninsular India.
 
 ```{r}
-#| label: vis-cropyield-peninsular-ricemaize
+
 
 india_crops |>
   filter(
@@ -374,7 +378,7 @@ india_crops |>
   ggplot() +
     aes(x = year, y = yield_kg_per_ha) +
     geom_line(colour = "#eeeeee", linewidth = 0.5) +
-    geom_point(aes(colour = phase)) +
+    geom_point(aes(colour = phase_soi)) +
     geom_smooth(colour = "#eeeeee", se = FALSE) +
     scale_colour_manual(values = enso_colours) +
     theme_minimal() +
@@ -390,7 +394,7 @@ india_crops |>
 ```
 
 ```{r}
-#| label: vis-cropyield-byregion-allcrops-resid
+
 
 # let's pre-calculate the loess smoother and then regress the errors against
 # enso phase
@@ -412,10 +416,10 @@ india_allcrops_byregion_resid
 ggplot(india_allcrops_byregion_resid) +
   aes(x = rainfall_region, y = .resid) +
   geom_boxplot(
-    aes(colour = phase, fill = phase),
+    aes(colour = phase_soi, fill = phase_soi),
     outlier.shape = NA,
     alpha = 0.25) +
-  geom_point(aes(colour = phase), position = "jitter", alpha = 0.5, size = 0.5) +
+  geom_point(aes(colour = phase_soi), position = "jitter", alpha = 0.5, size = 0.5) +
   geom_hline(yintercept = 0) +
   scale_colour_manual(values = enso_colours) +
   scale_fill_manual(values = enso_colours) +
@@ -436,7 +440,7 @@ The strong relationship here in Peninsular India, with a weaker relationship in 
 ### Crops grown by region
 
 ```{r}
-#| label: vis-cropsgrrown-byregion
+
 
 india_crops |>
   filter(year == max(year, na.rm = TRUE)) |>
@@ -475,7 +479,7 @@ The other big crops in
 ### Yield by crop
 
 ```{r}
-#| label: vis-cropyield-bycrop-allstates
+
 
 india_crops |>
   group_by(year, crop) |>
@@ -508,10 +512,10 @@ india_national_bycrop_resid
 ggplot(india_national_bycrop_resid) +
   aes(x = crop, y = .resid) +
   geom_boxplot(
-    aes(colour = phase, fill = phase),
+    aes(colour = phase_soi, fill = phase_soi),
     outlier.shape = NA,
     alpha = 0.25) +
-  geom_point(aes(colour = phase), position = "jitter", alpha = 0.5, size = 0.5) +
+  geom_point(aes(colour = phase_soi), position = "jitter", alpha = 0.5, size = 0.5) +
   geom_hline(yintercept = 0) +
   facet_wrap(vars(crop), scales = "free") +
   scale_colour_manual(values = enso_colours) +
@@ -538,7 +542,7 @@ That said, using SOI directly as a predictor might not be the way to go. It migh
 The first thing we'll need to do is match Indian states to rainfall regions (NE, NW, central, peninsular). Then we can join the rainfall and crop yield datasets.
 
 ```{r}
-#| label: join-rainfall-crops
+
 
 # first, summarise by year, state and crop
 india_crops |>
@@ -598,7 +602,7 @@ ggsave(
 It still looks like the stronger relationship here is with certain crops rather than certain regions, but let's break it down by both.
 
 ```{r}
-#| label: rainfall-crops-peninsular-kharif
+
 india_regions_all_resid |>
   filter(
     rainfall_region == "Peninsular India",
@@ -610,7 +614,7 @@ ggplot(peninsula_kharif) +
   aes(x = departure_percentage_jjas, y = yield_resid) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0) +
-  geom_point(aes(colour = phase)) +
+  geom_point(aes(colour = phase_soi)) +
   facet_wrap(vars(crop), scales = "free") +
   scale_colour_manual(values = enso_colours) +
   theme_minimal() +
@@ -633,9 +637,9 @@ Here, global and national temperatures are courtesy of [Berkeley Earth](https://
 Let's start with global temperature data:
 
 ```{r}
-#| label: import-temperature-global
 
-here( "data", "berkeley-monthly-tavg-global.txt") |>
+
+here("data", "berkeley-monthly-tavg-global.txt") |>
   read_table(
     col_names = c(
       "year", "month",
@@ -654,14 +658,14 @@ temp_monthly
 Let's join it to the Nino3.4, which we have monthly across the whole year. But we might need a smoother on those first.
 
 ```{r}
-#| label: smooth-nino34
+
 nino34 |>
   mutate(nino34_3mth = (nino34 + lead(nino34) + lag(nino34)) / 3) ->
 nino34_smooth
 ```
 
 ```{r}
-#| label: join-temperature-enso
+
 temp_monthly |>
   inner_join(nino34_smooth, join_by(year == year, month == month)) |>
   mutate(
@@ -672,8 +676,11 @@ temp_monthly |>
       TRUE ~ "neutral")) |>
   filter(date >= as.Date("1900-01-01")) ->
 temp_toplot
+```
 
-ggplot(temp_toplot) +
+```{r}
+
+ggplot(temp_toplot |> filter(!is.na(anom_annual))) +
   aes(x = date) +
   geom_linerange(
     aes(ymin = anom_annual, ymax = anom_5yr, colour = phase_nino34)) +
@@ -682,7 +689,43 @@ ggplot(temp_toplot) +
     aes(y = anom_annual, colour = phase_nino34),
     data = temp_toplot |> filter(is.na(anom_5yr), !is.na(anom_annual)),
     size = 0.25) +
-  scale_colour_manual(values = enso_colours) +
-  theme_minimal()
+  annotate_360_glasslight(
+    x = as.Date("1905-01-01"), y = 0.875, size = 5,
+    hjust = "inward",
+    label = glue(
+      "The globe has **steadily warmed** over the last century,",
+      "but temperatures fluctuate year-to-year.",
+      "<span style=\"color: {enso_colours['elnino']}\">**El Niño years**</span> often push global",
+      "temperatures up...",
+      .sep = "<br>")) +
+  annotate_360_glasslight(
+    x = as.Date("2020-01-01"), y = -0.515, size = 5,
+    hjust = "inward",
+    label = glue(
+      "... whereas <span style=\"color: {enso_colours['lanina']}\">**La Niña years**</span> often",
+      "push them down.",
+      .sep = "<br>")) +
+  scale_colour_manual(values = enso_colours, guide = NULL) +
+  scale_x_date(date_breaks = "20 years", date_labels = "%Y") +
+  scale_y_continuous(
+    labels = scales::label_number(style_positive = "plus", suffix = "°C")) +
+  theme_360() +
+  theme(
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    plot.title = element_text(margin = margin(t = 14, unit = "pt"))) +
+  labs(
+    x = NULL, y = NULL,
+    title = toupper("El Niño and global warming"),
+    caption = glue(
+      "**CHART**: James Goldie, 360info",
+      "**DATA:** Berkeley Earth, NASA PSL",
+      "<span style='font-size:12pt;'>El Niño/La Niña years classified using the Nino3.4 index; temperature anomalies from 1951–1980 average</span>",
+      .sep = "<br>")) ->
+global_plot
+
+save_360plot(global_plot,
+  here("out", "global-temperatures-enso.png"),
+  shape = "sdtv-landscape")
 
 ```
