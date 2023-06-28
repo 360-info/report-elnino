@@ -4,7 +4,7 @@ title: El Niño impacts
 description: An interactive map of El Niño impacts across the globe.
 author: James Goldie & Michael Joiner, 360info
 format:
-  360-embed-html:
+  sverto-html:
     css: svgmap.css
     anchor-sections: false
 resources:
@@ -18,65 +18,21 @@ resources:
     &quot; title=&quot;Interactive: future heat&quot; style=&quot;width:100%; height:500px; border:none; background-color: white;&quot; scrolling=&quot;no&quot;&gt;&lt;/iframe&gt;
 ---
 
-{{< include _popup-buttons.qmd >}}
+:::{}
+{{< include /.sverto/map/index.qmd >}}
+:::
 
-```{=html}
-<div id="map-description">
-  <h2 id="map-description-title">El Niño impacts</h2>
-  <p id="map-description-desc">James Goldie & Michael Joiner, 360info</p>
-</div>
-```
+{{< include ./_popup-buttons.qmd >}}
+
+:::{#map}
+:::
 
 ```{ojs}
-mapGraphic = {
-  
-  // load svg for interaction:
-  // https://observablehq.com/@rawgraphs/load-svg-and-add-simple-interaction
-  const mapString = await
-    FileAttachment("worldmap-interactive-test.svg").text();
-  const svgDoc = (new DOMParser).parseFromString(mapString, "image/svg+xml");
-  const svg = d3.select(svgDoc.documentElement).remove();
-
-  const mapTitle = d3.select("#map-description-title");
-  const mapDesc = d3.select("#map-description-desc");
-
-  // describe this chart with the div up above
-  svg
-    .attr("aria-labelledby-title", "map-description-title")
-    .attr("aria-describedby-title", "map-description-desc");
-  
-  // TODO - populate the other buttons with titles and descriptions...
-  svg.select("#btn-fire-aus")
-    .attr("data-title", "Fire in SE Aus")
-    .attr("data-desc", "Here's a par about fire weather in south-eastern Australia...")
-
-  // helper fn: update button styles, change map title/desc based on btn attr
-  function updateImpactState(title, description) {
-    allButtons.classed("activebtn", false);
-    d3.select(this).classed("activebtn", true);
-    console.log(d3.select(this).attr("id"))
-    mapTitle.text(d3.select(this).attr("data-title"));
-    mapDesc.text(d3.select(this).attr("data-desc"));
-  }
- 
-  // add focusability to the buttons; when they're clicked, update map state
-  let allButtons = svg.selectAll("[id^=\"btn-\"]");
-  allButtons
-    .attr("tabindex", "0")
-    .classed("impactbtn", true)
-    .on("click", updateImpactState);
-
-  // reset buttons when basemap is touched
-  let basemap = svg.selectAll("#basemap-cropped, #basemap-bg")
-  basemap.on("click", function() {
-    allButtons.classed("activebtn", false); // TODO - not working?
-    console.log("Basemap clicked")
-    mapTitle.text("El Niño impacts");
-    mapDesc.text("James Goldie & Michael Joiner, 360info");
-  });
-
-  return svg.node()
-}
+Diagram = import_svelte("Diagram.svelte")
+myDiagram = new Diagram.default({
+  // props: {},
+  target: document.querySelector("#map")
+})
 ```
 
-{{< include _popup-dialogs.qmd >}}
+{{< include ./_popup-dialogs.qmd >}}

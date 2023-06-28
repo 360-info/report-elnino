@@ -16,23 +16,23 @@
 			"version": "prerelease"
 		},
 		/* node/npm used for sverto; can be removed if you're not using it */
-		// "ghcr.io/devcontainers/features/node:1": {
-		// 	"nodeGypDependencies": true,
-		// 	"version": "lts"
-		// },
+		"ghcr.io/devcontainers/features/node:1": {
+			"nodeGypDependencies": true,
+			"version": "lts"
+		},
 		/* add apt packages (eg. system requirements for r packages) here.
 		   note that they are not frozen */
 		"ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
-			"packages": "libudunits2-dev,libxtst6,libxt6,libmagick++-dev"
+			"packages": "libudunits2-dev,libxtst6,libxt6,libmagick++-dev,librsvg2-dev"
 		},
 		/* add additional r packages here */
 		"ghcr.io/rocker-org/devcontainer-features/r-packages:1": {
-			"packages": "github::rstudio/renv,tidyverse,here,httpgd,janitor"
-		},
+			"packages": "github::rstudio/renv,tidyverse,here,httpgd,janitor,github::360-info/themes360info"
+		}
 	},
 
-	// add bundled fonts
-	"postCreateCommand": "cp .devcontainer/fonts/* /usr/local/share/fonts"
+	// install npm packages in package.json
+	"postCreateCommand": "npm install"
 
 	/* Use 'forwardPorts' to make a list of ports inside the container available
 	   locally. */
