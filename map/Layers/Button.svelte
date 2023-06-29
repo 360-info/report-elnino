@@ -1,5 +1,7 @@
 <script>
+  import { createEventDispatcher } from "svelte";
   import Icon from "@iconify/svelte";
+
   export let icon;
   export let size = 40;
   export let top;
@@ -7,9 +9,35 @@
   export let color = "#666666";
   export let iconScale = 0.6;
   export let deemphasised = false;
+
+  // id, title and description passed back to global state on click
+  export let buttonID;
+  export let title = "";
+  export let description = "";
+
+  /* event handlers: pass the id, title and desc props back on button push */
+
+	const dispatch = createEventDispatcher();
+	function activateButton() {
+		dispatch("buttonActivate", {
+      id: buttonID,
+      title: title,
+      description: description
+		});
+	}
+
+  // wrapper handler for activateButton when Enter or space key is pressed
+  function onKeyUp(e) {
+    if (e.key == "Enter" || e.key == " ") {
+      activateButton()
+    }
+  }
+
 </script>
 
 <div
+  on:click={activateButton}
+  on:keyup={onKeyUp}
   class="mapbutton"
   class:deemphasised
   tabindex="0"

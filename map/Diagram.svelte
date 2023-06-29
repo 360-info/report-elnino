@@ -1,4 +1,5 @@
 <script>
+  import { fly } from "svelte/transition";
   import Button from "./Layers/Button.svelte";
   import MapBG from "./Layers/MapBG.svelte";
   import MapLandGrid from "./Layers/MapLandGrid.svelte";
@@ -10,20 +11,26 @@
   let diagramBoxHeight = 444.18;
   let diagramAspectRatio = diagramBoxWidth + " / " + diagramBoxHeight;
 
-  // let activeButton = ""
-  // function changeActiveButton(to) {
-  //   activeButton = to;
-  // }
-  // add to button: on:click={() => updateActiveButton("XXX")}
+  // diagram state received from buttons' `buttonActivate` messages
+  let activeButton;
+  let diagramTitle = "El Niño impacts explained";
+  let diagramSubtitle = "James Goldie & Michael Joiner, 360info";
+  
+  // handler: update title block state based on info from the pushed button 
+  function updateTitleBlock(e) {
+    activeButton = e.detail.id;
+    diagramTitle = e.detail.title;
+    diagramSubtitle = e.detail.description;
+  }
+
+  // returns true if an active button id is defined but not the supplied id
+  function activeButtonIsNot(x) {
+    activeButton !== undefined && activeButton != x
+  }
 
   // TODO - add aria attributes
 
 </script>
-
-<div id="map-description">
-  <h2 id="map-description-title">El Niño impacts</h2>
-  <p id="map-description-desc">James Goldie & Michael Joiner, 360info</p>
-</div>
 
 <div class="mapstack" style:aspect-ratio="{diagramAspectRatio}">
   <MapBG/>
@@ -33,34 +40,117 @@
   <!-- India -->
   <Button
     icon="fa6-solid:sun-plant-wilt"
-    top="33%" left="33%" color="#994000"/>
+    top="33%" left="33%" color="#994000"
+    buttonID="india-drought"
+    title="Drought in India"
+    description="Here're some facts about that..."
+    on:buttonActivate={updateTitleBlock}
+    deemphasised={
+      activeButton !== undefined &&
+      activeButton != "india-drought"}
+     />
   <!-- SE Asia -->
   <Button
     icon="wi:day-haze"
     top="39%" left="40%" color="#b59d8c" iconScale=0.8
+    buttonID="seasia-haze"
+    title="Haze in SE Asia"
+    description="Here're some other facts about haze. Fugiat aute mollit sunt do excepteur deserunt. Et et ipsum amet quis cupidatat do deserunt deserunt laboris esse."
+    on:buttonActivate={updateTitleBlock}
+    deemphasised={
+      activeButton !== undefined &&
+      activeButton != "seasia-haze"}
     />
   <!-- SE Aus -->
   <Button
     icon="fa6-solid:fire"
     top="51%" left="51%" color="#ff4600"
-    deemphasised />
+    buttonID="fire-seaus"
+    title="Fire in SE Australia"
+    description="Here're some other facts about fire. Eu aliqua nostrud fugiat cillum. In elit cupidatat sunt anim cupidatat nulla dolore. Reprehenderit eu dolor culpa ad. Mollit amet eu et ad dolore."
+    on:buttonActivate={updateTitleBlock}
+    deemphasised={
+      activeButton !== undefined &&
+      activeButton != "fire-seaus"}
+    />
   <Button
     icon="fa6-solid:sun-plant-wilt"
-    top="56%" left="48%" color="#994000"/>
+    top="56%" left="48%" color="#994000"
+    buttonID="drought-seaus"
+    title="Drought in SE Australia"
+    description="Drought is interesting for several reasons! Aute enim cillum irure reprehenderit tempor commodo nostrud laboris."
+    on:buttonActivate={updateTitleBlock}
+    deemphasised={
+      activeButton !== undefined &&
+      activeButton != "drought-seaus"}
+    />
   <!-- Pacific -->
   <Button
     icon="fa6-solid:sun-plant-wilt"
-    top="45%" left="56%" color="#994000"/>
+    top="45%" left="56%" color="#994000"
+    buttonID="drought-spac"
+    title="Drought in the south Pacific"
+    description="Drought is interesting for several reasons! it could be different in the Pacific, though, where water storages are incredibly important."
+    on:buttonActivate={updateTitleBlock}
+    deemphasised={
+      activeButton !== undefined &&
+      activeButton != "drought-spac"}
+    />
   <Button
     icon="fa6-solid:hurricane"
-    top="45%" left="70%" color="#0095d0" iconScale=0.5/>
+    top="45%" left="70%" color="#0095d0" iconScale=0.5
+    buttonID="hurricane-pac"
+    title="Hurricanes in the Pacific"
+    description="Parts of the Pacific that sit near the zone of shifted convection often have to deal with more hurricanes than average during El Niños."
+    on:buttonActivate={updateTitleBlock}
+    deemphasised={
+      activeButton !== undefined &&
+      activeButton != "hurricane-pac"}
+    />
   <!-- Nth. America -->
   <Button
     icon="fa6-solid:house-flood-water"
-    top="22%" left="72%" color="#005bd0"/>
+    top="22%" left="72%" color="#005bd0"
+    buttonID="flood-seusa"
+    diagramTitle = "Extreme rain in the south-eastern US"
+    description="Extreme rainfall can be debilitating, risking homes and lives in flooding. Minim officia proident anim aliqua."
+    on:buttonActivate={updateTitleBlock}
+    deemphasised={
+      activeButton !== undefined &&
+      activeButton != "flood-seusa"}
+    />
   <Button
     icon="fa6-solid:hurricane"
-    top="25%" left="86%" color="#0095d0" iconScale=0.5/>
+    top="25%" left="86%" color="#0095d0" iconScale=0.5
+    buttonID="hurricane-alt"
+    diagramTitle = "Hurricanes in the Atlantic"
+    description="The Atlantic Ocean often sees quieter hurricane seasons during El Niños, with fewer hurricanes than in a typical year. The ocean is so hot this year, however, that US authorities are forecasting an average hurricane season."
+    on:buttonActivate={updateTitleBlock}
+    deemphasised={
+      activeButton !== undefined &&
+      activeButton != "hurricane-alt"}
+    />
+</div>
+
+<!-- title block -->
+
+<div id="map-description">
+  {#key diagramTitle}
+  <h2
+    in:fly={{ y: 20, duration: 200, delay: 200 }}
+    out:fly={{ y: 20, duration: 200 }}
+    id="map-description-title">
+    {diagramTitle}
+  </h2>
+  {/key}
+  {#key diagramSubtitle}
+  <p
+    in:fly={{ y: 20, duration: 200, delay: 200 }}
+    out:fly={{ y: 20, duration: 200 }}
+    id="map-description-desc">
+    {diagramSubtitle}
+  </p>
+  {/key}
 </div>
 
 <style>
