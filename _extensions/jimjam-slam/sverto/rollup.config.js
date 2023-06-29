@@ -1,4 +1,5 @@
 import svelte from 'rollup-plugin-svelte';
+import image from '@rollup/plugin-image';
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import { terser } from 'rollup-plugin-terser';
@@ -52,6 +53,7 @@ export default uniqueSvelteFiles.map(
 				dedupe: ["svelte"]
 			}),
 			commonjs(),
-			production && terser()
+			production && terser(),
+			image()
 		]
 	}));
