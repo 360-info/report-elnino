@@ -40,7 +40,7 @@
     innerWidth >= 768 ? "medium" :
     "small";
   $: buttonSize =
-    sizeClass == "x-large" ? 60 : 
+    sizeClass == "x-large" ? 45 : 
     sizeClass == "large" ? 40 :
     sizeClass == "medium" ? 30 :
     20;
@@ -57,7 +57,7 @@
   <!-- India -->
   <Button
     icon="fa6-solid:sun-plant-wilt"
-    top="33%" left="33%" color="#994000"
+    top="28%" left="31%" color="#994000"
     size={buttonSize}
     buttonID="india-drought"
     title="Drought in India"
@@ -70,7 +70,7 @@
   <!-- SE Asia -->
   <Button
     icon="wi:day-haze"
-    top="39%" left="40%" color="#b59d8c" iconScale=0.8
+    top="35%" left="38%" color="#b59d8c" iconScale=0.8
     size={buttonSize}
     buttonID="seasia-haze"
     title="Haze in SE Asia"
@@ -83,7 +83,7 @@
   <!-- SE Aus -->
   <Button
     icon="fa6-solid:fire"
-    top="51%" left="51%" color="#ff4600"
+    top="46%" left="48%" color="#ff4600"
     size={buttonSize}
     buttonID="fire-seaus"
     title="Fire in SE Australia"
@@ -95,7 +95,7 @@
     />
   <Button
     icon="fa6-solid:sun-plant-wilt"
-    top="56%" left="48%" color="#994000"
+    top="49%" left="40%" color="#994000"
     size={buttonSize}
     buttonID="drought-seaus"
     title="Drought in SE Australia"
@@ -108,7 +108,7 @@
   <!-- Pacific -->
   <Button
     icon="fa6-solid:sun-plant-wilt"
-    top="45%" left="56%" color="#994000"
+    top="41%" left="53%" color="#994000"
     size={buttonSize}
     buttonID="drought-spac"
     title="Drought in the south Pacific"
@@ -120,7 +120,7 @@
     />
   <Button
     icon="fa6-solid:hurricane"
-    top="45%" left="70%" color="#0095d0" iconScale=0.5
+    top="36%" left="66%" color="#0095d0" iconScale=0.5
     size={buttonSize}
     buttonID="hurricane-pac"
     title="Hurricanes in the Pacific"
@@ -133,7 +133,7 @@
   <!-- Nth. America -->
   <Button
     icon="fa6-solid:house-flood-water"
-    top="22%" left="72%" color="#005bd0"
+    top="18%" left="68%" color="#005bd0"
     size={buttonSize}
     buttonID="flood-seusa"
     diagramTitle = "Extreme rain in the south-eastern US"
@@ -145,7 +145,7 @@
     />
   <Button
     icon="fa6-solid:hurricane"
-    top="25%" left="86%" color="#0095d0" iconScale=0.5
+    top="15%" left="82%" color="#0095d0" iconScale=0.5
     size={buttonSize}
     buttonID="hurricane-alt"
     diagramTitle = "Hurricanes in the Atlantic"
