@@ -30,7 +30,24 @@
 
   // TODO - add aria attributes
 
+  // track window width to shrink components for mobile
+  let innerWidth;
+  let sizeClass;
+  let buttonSize;
+  $: sizeClass =
+    innerWidth >= 1200 ? "x-large" : 
+    innerWidth >= 992 ? "large" :
+    innerWidth >= 768 ? "medium" :
+    "small";
+  $: buttonSize =
+    sizeClass == "x-large" ? 60 : 
+    sizeClass == "large" ? 40 :
+    sizeClass == "medium" ? 30 :
+    20;
+
 </script>
+
+<svelte:window bind:innerWidth />
 
 <div class="mapstack" style:aspect-ratio="{diagramAspectRatio}">
   <MapBG/>
@@ -41,6 +58,7 @@
   <Button
     icon="fa6-solid:sun-plant-wilt"
     top="33%" left="33%" color="#994000"
+    size={buttonSize}
     buttonID="india-drought"
     title="Drought in India"
     description="Here're some facts about that..."
@@ -53,6 +71,7 @@
   <Button
     icon="wi:day-haze"
     top="39%" left="40%" color="#b59d8c" iconScale=0.8
+    size={buttonSize}
     buttonID="seasia-haze"
     title="Haze in SE Asia"
     description="Here're some other facts about haze. Fugiat aute mollit sunt do excepteur deserunt. Et et ipsum amet quis cupidatat do deserunt deserunt laboris esse."
@@ -65,6 +84,7 @@
   <Button
     icon="fa6-solid:fire"
     top="51%" left="51%" color="#ff4600"
+    size={buttonSize}
     buttonID="fire-seaus"
     title="Fire in SE Australia"
     description="Here're some other facts about fire. Eu aliqua nostrud fugiat cillum. In elit cupidatat sunt anim cupidatat nulla dolore. Reprehenderit eu dolor culpa ad. Mollit amet eu et ad dolore."
@@ -76,6 +96,7 @@
   <Button
     icon="fa6-solid:sun-plant-wilt"
     top="56%" left="48%" color="#994000"
+    size={buttonSize}
     buttonID="drought-seaus"
     title="Drought in SE Australia"
     description="Drought is interesting for several reasons! Aute enim cillum irure reprehenderit tempor commodo nostrud laboris."
@@ -88,6 +109,7 @@
   <Button
     icon="fa6-solid:sun-plant-wilt"
     top="45%" left="56%" color="#994000"
+    size={buttonSize}
     buttonID="drought-spac"
     title="Drought in the south Pacific"
     description="Drought is interesting for several reasons! it could be different in the Pacific, though, where water storages are incredibly important."
@@ -99,6 +121,7 @@
   <Button
     icon="fa6-solid:hurricane"
     top="45%" left="70%" color="#0095d0" iconScale=0.5
+    size={buttonSize}
     buttonID="hurricane-pac"
     title="Hurricanes in the Pacific"
     description="Parts of the Pacific that sit near the zone of shifted convection often have to deal with more hurricanes than average during El Niños."
@@ -111,6 +134,7 @@
   <Button
     icon="fa6-solid:house-flood-water"
     top="22%" left="72%" color="#005bd0"
+    size={buttonSize}
     buttonID="flood-seusa"
     diagramTitle = "Extreme rain in the south-eastern US"
     description="Extreme rainfall can be debilitating, risking homes and lives in flooding. Minim officia proident anim aliqua."
@@ -122,6 +146,7 @@
   <Button
     icon="fa6-solid:hurricane"
     top="25%" left="86%" color="#0095d0" iconScale=0.5
+    size={buttonSize}
     buttonID="hurricane-alt"
     diagramTitle = "Hurricanes in the Atlantic"
     description="The Atlantic Ocean often sees quieter hurricane seasons during El Niños, with fewer hurricanes than in a typical year. The ocean is so hot this year, however, that US authorities are forecasting an average hurricane season."

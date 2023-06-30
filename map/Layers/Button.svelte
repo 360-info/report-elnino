@@ -52,7 +52,9 @@
   style:justify-content="center"
   style:align-items="center"
   style:text-align="center"
-  style:box-shadow="5px 5px 40px -10px {color}"
+  style:border="20px solid transparent"
+  style:background-clip="content-box"
+  style:filter="drop-shadow(0px 0px {size * 0.4}px {color}) {deemphasised ? "grayscale(50%) opacity(25%)" : ""}"
   >
   <Icon
     icon={icon}
@@ -71,9 +73,5 @@
   {
     transform: scale(1.25);
     outline: none;
-  }
-
-  .deemphasised {
-    filter: grayscale(50%) opacity(25%);
   }
 </style>
