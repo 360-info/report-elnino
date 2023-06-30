@@ -164,7 +164,9 @@
   <h2
     in:fly={{ y: 20, duration: 200, delay: 200 }}
     out:fly={{ y: 20, duration: 200 }}
-    id="map-description-title">
+    id="map-description-title"
+    class="title-{sizeClass}"
+    >
     {diagramTitle}
   </h2>
   {/key}
@@ -201,6 +203,13 @@
     max-width: 100%;
     position: relative;
   }
+
+  /* shrink title for mobile */
+
+  #map-description h2.title-x-large { font-size: 300%; }
+  #map-description h2.title-large   { font-size: 275%; }
+  #map-description h2.title-medium  { font-size: 225%; }
+  #map-description h2.title-small   { font-size: 150%; }
 
   /* animate walker circulation lines */
 
