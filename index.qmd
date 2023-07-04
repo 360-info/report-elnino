@@ -14,6 +14,7 @@ library(tidyverse)
 library(themes360info)
 library(janitor)
 library(broom)
+library(slider)
 library(glue)
 library(RColorBrewer)
 library(here)
@@ -69,7 +70,6 @@ nino34_jjas
 And here's SOI over June-Sep each year:
 
 ```{r}
-
 
 here("data", "soi-monthly-raw.csv") |>
   read_csv(col_names = c("year_month", "soi")) |>
@@ -637,10 +637,9 @@ Here, global and national temperatures are courtesy of [Berkeley Earth](https://
 Let's start with global temperature data:
 
 ```{r}
-
-
-here("data", "berkeley-monthly-tavg-global.txt") |>
-  read_table(
+list.files(here("data"), pattern = glob2rx("berkeley-*.txt"), full.names = TRUE) |>
+  set_names(x = _) |>
+  map_dfr(read_table,
     col_names = c(
       "year", "month",
       "anom_monthly", "unc_monthly",
@@ -650,8 +649,20 @@ here("data", "berkeley-monthly-tavg-global.txt") |>
       "anom_20yr",    "unc_20yr"),
     col_types = "iidddddddddd",
     comment = "%",
-    na = c("NA", "NaN")) |>
-  slice(-1) ->
+    na = c("NA", "NaN"),
+    .id = "path") |>
+  slice(-1) |>
+  mutate(
+    fname = basename(path),
+    location =
+      str_replace_all(fname,
+        c("berkeley-monthly-tavg-" = "", ".txt" = "", "_" = " ")) |>
+      str_to_title(),
+    relationship_long = factor(if_else(
+      location %in% c("Indonesia", "Malaysia", "Ecuador"),
+      glue("{location}: hotter ↑ in <span style=\"color: {enso_colours['elnino']}\">El Niño years</span>"),
+      glue("{location}: hotter ↑ in <span style=\"color: {enso_colours['lanina']}\">La Niña years</span>")))) |>
+  select(location, relationship_long, everything(), -path, -fname) ->
 temp_monthly
 ```
 
@@ -659,73 +670,139 @@ Let's join it to the Nino3.4, which we have monthly across the whole year. But w
 
 ```{r}
 
-nino34 |>
-  mutate(nino34_3mth = (nino34 + lead(nino34) + lag(nino34)) / 3) ->
-nino34_smooth
+enso |>
+  select(-starts_with("phase")) |>
+  mutate(
+    soi_3mth = (soi + lead(soi) + lag(soi)) / 3,
+    nino34_3mth = (nino34 + lead(nino34) + lag(nino34)) / 3,
+    phase_nino34 = case_when(
+      nino34_3mth <= -0.5 ~ "lanina",
+      nino34_3mth >= 0.5 ~ "elnino",
+      TRUE ~ "neutral"),
+    phase_soi = case_when(
+      soi_3mth <= -8 ~ "elnino",
+      soi_3mth >= 8 ~ "lanina",
+      TRUE ~ "neutral")) ->
+enso_smooth
+
 ```
 
 ```{r}
 
 temp_monthly |>
-  inner_join(nino34_smooth, join_by(year == year, month == month)) |>
-  mutate(
-    date = ymd(paste(year, month, "01")),
-    phase_nino34 = case_when(
-      nino34_3mth <= -0.5 ~ "lanina",
-      nino34_3mth >= 0.5 ~ "elnino",
-      TRUE ~ "neutral")) |>
+  left_join(enso_smooth, join_by(year == year, month == month), relationship = "many-to-one") |>
+  mutate(date = ymd(paste(year, month, "01"))) |>
   filter(date >= as.Date("1900-01-01")) ->
 temp_toplot
 ```
 
-```{r}
+First let's look at the global picture:
 
-ggplot(temp_toplot |> filter(!is.na(anom_annual))) +
-  aes(x = date) +
-  geom_linerange(
-    aes(ymin = anom_annual, ymax = anom_5yr, colour = phase_nino34)) +
-  geom_line(aes(y = anom_5yr), colour = "black") +
-  geom_point(
-    aes(y = anom_annual, colour = phase_nino34),
-    data = temp_toplot |> filter(is.na(anom_5yr), !is.na(anom_annual)),
-    size = 0.25) +
-  annotate_360_glasslight(
-    x = as.Date("1905-01-01"), y = 0.875, size = 5,
-    hjust = "inward",
-    label = glue(
-      "The globe has **steadily warmed** over the last century,",
-      "but temperatures fluctuate year-to-year.",
-      "<span style=\"color: {enso_colours['elnino']}\">**El Niño years**</span> often push global",
-      "temperatures up...",
-      .sep = "<br>")) +
-  annotate_360_glasslight(
-    x = as.Date("2020-01-01"), y = -0.515, size = 5,
-    hjust = "inward",
-    label = glue(
-      "... whereas <span style=\"color: {enso_colours['lanina']}\">**La Niña years**</span> often",
-      "push them down.",
-      .sep = "<br>")) +
-  scale_colour_manual(values = enso_colours, guide = NULL) +
-  scale_x_date(date_breaks = "20 years", date_labels = "%Y") +
-  scale_y_continuous(
-    labels = scales::label_number(style_positive = "plus", suffix = "°C")) +
-  theme_360() +
-  theme(
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor.x = element_blank(),
-    plot.title = element_text(margin = margin(t = 14, unit = "pt"))) +
-  labs(
-    x = NULL, y = NULL,
-    title = toupper("El Niño and global warming"),
-    caption = glue(
-      "**CHART**: James Goldie, 360info",
-      "**DATA:** Berkeley Earth, NASA PSL",
-      "<span style='font-size:12pt;'>El Niño/La Niña years classified using the Nino3.4 index; temperature anomalies from 1951–1980 average</span>",
-      .sep = "<br>")) ->
+```{r}
+temp_toplot |>
+  filter(!is.na(anom_annual), location == "Global") |>
+  ggplot() +
+    aes(x = date) +
+    geom_linerange(
+      aes(ymax = anom_annual, ymin = anom_5yr, colour = phase_nino34)) +
+    geom_line(aes(y = anom_5yr), colour = "black") +
+    # add points for recent years after the smoother
+    geom_point(
+      aes(y = anom_annual, colour = phase_nino34),
+      data = temp_toplot |>
+        filter(
+          location == "global",
+          year > 2016,
+          is.na(anom_5yr),
+          !is.na(anom_annual)),
+      size = 0.25) +
+    # general text annotations
+    annotate_360_glasslight(
+      x = as.Date("1905-01-01"), y = 0.875, size = 5,
+      hjust = "inward",
+      label = glue(
+        "The globe has **steadily warmed** over the last century,",
+        "but temperatures fluctuate year-to-year.",
+        "<span style=\"color: {enso_colours['elnino']}\">**El Niño years**</span> often push global",
+        "temperatures up...",
+        .sep = "<br>")) +
+    annotate_360_glasslight(
+      x = as.Date("2020-01-01"), y = -0.515, size = 5,
+      hjust = "inward",
+      label = glue(
+        "... whereas <span style=\"color: {enso_colours['lanina']}\">**La Niña years**</span> often",
+        "push them down.",
+        .sep = "<br>")) +
+    scale_colour_manual(values = enso_colours, guide = NULL) +
+    scale_x_date(date_breaks = "20 years", date_labels = "%Y") +
+    scale_y_continuous(
+      labels = scales::label_number(accuracy = 0.1, style_positive = "plus", suffix = "°C")) +
+    theme_360() +
+    theme(
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      plot.title = element_text(margin = margin(t = 14, unit = "pt"))) +
+    labs(
+      x = NULL, y = NULL,
+      title = toupper("El Niño and global warming"),
+      subtitle = "Berkeley Earth estimates a 54% chance that 2023 will be the hottest year on record",
+      caption = glue(
+        "**CHART**: James Goldie, 360info",
+        "**DATA:** Berkeley Earth, NASA PSL",
+        "<span style='font-size:12pt;'>El Niño/La Niña years classified using the Nino3.4 index; temperature anomalies from 1951–1980 average</span>",
+        .sep = "<br>")) ->
 global_plot
 
 save_360plot(global_plot,
   here("out", "global-temperatures-enso.png"),
+  shape = "sdtv-landscape")
+save_360plot(global_plot,
+  here("out", "global-temperatures-enso.svg"),
+  shape = "sdtv-landscape")
+
+```
+
+And then some selected regions:
+
+```{r}
+temp_toplot |>
+  filter(!is.na(anom_annual), location != "Global") |>
+  ggplot() +
+    aes(x = date) +
+    geom_linerange(
+      aes(ymax = anom_annual, ymin = anom_5yr, colour = phase_nino34)) +
+    geom_line(aes(y = anom_5yr), colour = "black") +
+    facet_wrap(vars(relationship_long), drop = TRUE, ncol = 2, scales = "free_y") +
+    scale_colour_manual(values = enso_colours, guide = NULL) +
+    scale_x_date(date_breaks = "20 years", date_labels = "%Y") +
+    scale_y_continuous(
+      labels = scales::label_number(
+        style_positive = "plus",
+        suffix = "°C")) +
+    theme_360() +
+    theme(
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      plot.title = element_text(margin = margin(t = 14, unit = "pt")),
+      strip.text = ggtext::element_markdown(face = "bold", hjust = 0)
+      ) +
+    labs(
+      x = NULL, y = NULL,
+      title = toupper("El Niño and regional warming"),
+      subtitle = "El Niño's effects vary across the Pacific",
+      caption = glue(
+        "**CHART**: James Goldie, 360info",
+        "**DATA:** Berkeley Earth, NASA PSL",
+        "<span style='font-size:12pt;'>El Niño/La Niña years classified using the Nino3.4 index; temperature anomalies from 1951–1980 average</span>",
+        .sep = "<br>")) ->
+regional_plot
+
+save_360plot(regional_plot,
+  here("out", "regional-temperatures-enso.png"),
+  shape = "sdtv-landscape")
+save_360plot(regional_plot,
+  here("out", "regional-temperatures-enso.svg"),
   shape = "sdtv-landscape")
 
 ```
