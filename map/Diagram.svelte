@@ -53,11 +53,30 @@
   <MapBG/>
   <MapSSTs/>
   <MapLandGrid/>
-  <MapWalkerCirc/>
+  <!-- how it works: walker circulation -->
+  <MapWalkerCirc
+    inNeutralState={
+      activeButton !== undefined &&
+      activeButton == "walker-circulation"}
+  />
+  <Button
+    icon="fa6-solid:sun-plant-wilt"
+    top="25%" left="54%" color="#fc8c03"
+    size={buttonSize}
+    borderRadius="0"
+    buttonID="walker-circulation"
+    title="How El Niño works"
+    description="In normal years, air flows across the Pacific from east to west, rising over south-east Asia to cause storms and rainfall.<br><br>During al En Niño, warmer waters near Central America and cooler ones near south-east Asia cause this wind pattern to break.<br></br>Air now rises in the middle of the Pacfic, bringing more rainfall there and leaving countries in the west drier."
+    on:buttonActivate={updateTitleBlock}
+    deemphasised={
+      activeButton !== undefined &&
+      activeButton != "walker-circulation"}
+     />
+  
   <!-- India -->
   <Button
     icon="fa6-solid:sun-plant-wilt"
-    top="28%" left="31%" color="#994000"
+    top="18%" left="68%" color="#005bd0"
     size={buttonSize}
     buttonID="india-drought"
     title="Drought in India"
@@ -211,23 +230,4 @@
   #map-description h2.title-medium  { font-size: 225%; }
   #map-description h2.title-small   { font-size: 150%; }
 
-  /* animate walker circulation lines */
-
-  @media (prefers-reduced-motion: no-preference) {
-    @keyframes walkerascension {
-      0% { stroke-dashoffset: 0; }  
-      100% { stroke-dashoffset: -6px; }
-    }
-    #elnino-walker-ascend {
-      animation: 0.3s linear 0s infinite walkerascension;
-    }
-    
-    @keyframes walkersidesdescend {
-      0% { stroke-dashoffset: 0; }  
-      100% { stroke-dashoffset: -13px; }
-    }
-    #elnino-walker-sidesdescend {
-      animation: 2.5s linear 0s infinite walkersidesdescend;
-    }
-  }
 </style>

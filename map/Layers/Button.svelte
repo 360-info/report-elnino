@@ -9,6 +9,7 @@
   export let color = "#666666";
   export let iconScale = 0.6;
   export let deemphasised = false;
+  export let borderRadius = "50%";
 
   // id, title and description passed back to global state on click
   export let buttonID;
@@ -38,16 +39,17 @@
 <div
   on:click={activateButton}
   on:keyup={onKeyUp}
+  role="button"
+  tabindex="0"
   class="mapbutton"
   class:deemphasised
-  tabindex="0"
   style:width={size + "px"}
   style:height={size + "px"}
   style:top={top}
   style:left={left}
   style:position="absolute"
   style:background-color={color}
-  style:border-radius="50%"
+  style:border-radius={borderRadius}
   style:display="flex"
   style:justify-content="center"
   style:align-items="center"
