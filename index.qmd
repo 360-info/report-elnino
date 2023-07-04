@@ -129,6 +129,44 @@ nino34 |>
   write_csv(here("data", "enso-indicators-monthly.csv")) ->
 enso
 
+nino34 |>
+  inner_join(soi, join_by(year == year, month == month),
+    relationship = "one-to-one") |>
+  filter(month %in% 6:9) |>
+  group_by(year) |>
+  summarise(
+    mean_soi = mean(soi, na.rm = TRUE),
+    mean_nino34 = mean(nino34, na.rm = TRUE)) |>
+  mutate(
+    phase_soi = case_when(
+      mean_soi >= 7 ~ "lanina",
+      mean_soi <= -7 ~ "elnino",
+      TRUE ~ "neutral"),
+    phase_nino34 = case_when(
+      mean_nino34 <= -0.5 ~ "lanina",
+      mean_nino34 >= 0.5 ~ "elnino",
+      TRUE ~ "neutral"),
+    phase_either = case_when(
+      phase_nino34 == "elnino" & phase_soi == "lanina" |
+        phase_nino34 == "lanina" & phase_soi == "elnino" ~ "disagree",
+      phase_nino34 == "neutral" & phase_soi == "neutral" ~ "neutral",
+      phase_nino34 == "elnino" ~ "elnino",
+      phase_soi == "elnino" ~ "elnino",
+      phase_nino34 == "lanina" ~ "lanina",
+      phase_soi == "lanina" ~ "lanina",
+      TRUE ~ NA_character_),
+    phase_both = case_when(
+      phase_nino34 == "elnino" & phase_soi == "lanina" |
+        phase_nino34 == "lanina" & phase_soi == "elnino" ~ "disagree",
+      phase_nino34 == "neutral" & phase_soi == "neutral" ~ "neutral",
+      phase_nino34 == "elnino" ~ "elnino",
+      phase_soi == "elnino" ~ "elnino",
+      phase_nino34 == "lanina" ~ "lanina",
+      phase_soi == "lanina" ~ "lanina",
+      TRUE ~ NA_character_)) |>
+  write_csv(here("data", "enso-indicators-jjas.csv")) ->
+enso_jjas
+
 # lengthen and plot
 enso |>
   select(year, month, starts_with("phase")) |>
@@ -374,23 +412,27 @@ india_crops |>
       (sum_production_1000_tons * 1e6) /
       (sum_area_1000_ha * 1e6)) |>
   ungroup() |>
-  left_join(soi_jjas, by = join_by(year)) |>
-  ggplot() +
-    aes(x = year, y = yield_kg_per_ha) +
-    geom_line(colour = "#eeeeee", linewidth = 0.5) +
-    geom_point(aes(colour = phase_soi)) +
-    geom_smooth(colour = "#eeeeee", se = FALSE) +
-    scale_colour_manual(values = enso_colours) +
-    theme_minimal() +
-    theme(
-      legend.direction = "horizontal",
-      legend.position = "top",
-      panel.grid.major.x = element_blank(),
-      panel.grid.minor.x = element_blank()) +
-    labs(
-      x = NULL, y = "Yield (kg per ha)",
-      title = "Rice and maize yield in Peninsular India",
-      subtitle = "Highlighted by ENSO phase")
+  left_join(enso_jjas, by = join_by(year)) |>
+  filter(!is.na(yield_kg_per_ha), !is.na(mean_soi)) ->
+  # write_csv(here("data", "india-ricemaize-peninsular.csv")) ->
+india_ricemaize_peninsular
+
+ggplot(india_ricemaize_peninsular) +
+  aes(x = year, y = yield_kg_per_ha) +
+  geom_line(colour = "#eeeeee", linewidth = 0.5) +
+  geom_point(aes(colour = phase_nino34)) +
+  geom_smooth(colour = "#eeeeee", se = FALSE) +
+  scale_colour_manual(values = enso_colours) +
+  theme_minimal() +
+  theme(
+    legend.direction = "horizontal",
+    legend.position = "top",
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank()) +
+  labs(
+    x = NULL, y = "Yield (kg per ha)",
+    title = "Rice and maize yield in Peninsular India",
+    subtitle = "Highlighted by ENSO phase")
 ```
 
 ```{r}
@@ -406,17 +448,35 @@ fit_and_augment_smoother <- function(df) {
 }
 
 india_allcrops_byregion |>
-  left_join(soi_jjas, by = join_by(year)) |>
+  left_join(enso_jjas, by = join_by(year)) |>
   filter(!is.na(yield_kg_per_ha), !is.na(mean_soi)) |>
   nest(.by = rainfall_region) |>
   mutate(data = map(data, fit_and_augment_smoother)) |>
   unnest(data) ->
 india_allcrops_byregion_resid
 
+india_ricemaize_peninsular |>
+  filter(!is.na(yield_kg_per_ha), !is.na(mean_soi)) |>
+  loess(yield_kg_per_ha ~ year, data = _) |>
+  augment() |>
+  left_join(india_ricemaize_peninsular,
+    join_by(year == year, yield_kg_per_ha == yield_kg_per_ha)) |>
+  write_csv(here("data", "india-ricemaize-peninsular.csv")) ->
+india_ricemaize_peninsular_reisd
+
+india_ricemaize_peninsular_reisd |>
+  mutate(
+    elnino = if_else(phase_nino34 == "elnino", yield_kg_per_ha, NA_real_),
+    neutral = if_else(phase_nino34 == "neutral", yield_kg_per_ha, NA_real_),
+    lanina = if_else(phase_nino34 == "lanina", yield_kg_per_ha, NA_real_)) |>
+  select(year, .fitted, .resid, elnino, neutral, lanina) |>
+  print(n = Inf) |>
+  write_csv(here("data", "flourish-ricemaize.csv"), na = "")
+
 ggplot(india_allcrops_byregion_resid) +
   aes(x = rainfall_region, y = .resid) +
   geom_boxplot(
-    aes(colour = phase_soi, fill = phase_soi),
+    aes(colour = phase_nino34, fill = phase_nino34),
     outlier.shape = NA,
     alpha = 0.25) +
   geom_point(aes(colour = phase_soi), position = "jitter", alpha = 0.5, size = 0.5) +
@@ -580,18 +640,29 @@ india_regions_all |>
   rename(yield_fitted = .fitted, yield_resid = .resid) ->
 india_regions_all_resid
 
-# now visualise rainfall against residuals
-ggplot(india_regions_all_resid) +
-  aes(x = departure_percentage_jjas, y = yield_resid) +
-  geom_hline(yintercept = 0) +
-  geom_vline(xintercept = 0) +
-  geom_point() +
-  facet_grid(rows = vars(crop), cols = vars(rainfall_region), scales = "free") +
-  theme_minimal() +
-  theme(
-    plot.background = element_rect(fill = "white")
-  ) ->
-region_crop_rainfall_plot
+india_regions_all_resid |>
+  filter(rainfall_region == "Peninsular India", crop %in% c("Rice", "Maize")) |>
+  left_join(enso_jjas, join_by(year == year)) |>
+  mutate(across(
+    starts_with("phase"),
+    \(x) case_match(x,
+      "elnino"  ~ "El Niño",
+      "lanina"  ~ "La Niña",
+      "neutral" ~ "Neutral"))) |>
+  write_csv(here("data", "india-ricemaize-peninsular.csv")) |>
+  # now visualise rainfall against residuals
+  ggplot() +
+    aes(x = departure_percentage_jjas, y = yield_resid, colour = phase_nino34) +
+    geom_hline(yintercept = 0) +
+    geom_vline(xintercept = 0) +
+    geom_point(size = 3) +
+    facet_grid(rows = vars(crop), cols = vars(rainfall_region), scales = "free") +
+    scale_colour_manual(values = enso_colours) +
+    theme_minimal() +
+    theme(
+      plot.background = element_rect(fill = "white")
+    ) ->
+  region_crop_rainfall_plot
 
 ggsave(
   here("out", "region_crop_rainfall_plot.png"),
