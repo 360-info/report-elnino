@@ -133,6 +133,30 @@
 
   </g>
 </svg>
+<div
+  id="explanation-1"
+  class="explanation-box"
+  style:top="65%"
+  style:left="7.5%">
+  <h3>1</h3>
+  <p>First part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco.</p>
+</div>
+<div
+  id="explanation-2"
+  class="explanation-box"
+  style:top="65%"
+  style:left="37.5%">
+  <h3>2</h3>
+  <p>Second part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco.</p>
+</div>
+<div
+  id="explanation-1"
+  class="explanation-box"
+  style:top="65%"
+  style:left="67.5%">
+  <h3>3</h3>
+  <p>Third part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco.</p>
+</div>
 
 <style>
 
@@ -203,6 +227,28 @@
   /* straight walker descend paths animate on opacity */
   [id^="walker-straight-"] {
     transition: opacity 1.5s linear;
+  }
+
+  /* text box styling */
+  .explanation-box {
+    position: absolute;
+    box-sizing: content-box;
+    width: 25%;
+    padding: 10px;
+    border-radius: 5px;
+    background: #ffffffcc;
+    box-shadow: 5px 5px 10px #00000011;
+    z-index: 1;
+  }
+  .explanation-box h3 {
+    margin-top: 0px;
+    margin-bottom: 10px;
+    font-size: 2vw;
+  }
+  .explanation-box p {
+    margin-bottom: 0px;
+    margin-top: 0px;
+    font-size: 1.25vw;
   }
 
 </style>
