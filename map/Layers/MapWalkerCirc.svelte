@@ -50,8 +50,13 @@
       class:inNeutralState>
       <path
         class="walker-descend-right"
-        d="m704.01,63.59h123.21s19.71.91,19.71,16.6v82.24s.67,19.36-18.2,19.36h-124.71"
+        d="{inNeutralState ?
+          "m533.22,63.59h294s19.71.91,19.71,16.6v82.24s.67,19.36-18.2,19.36h-295.51" :
+          "m704.01,63.59h123.21s19.71.91,19.71,16.6v82.24s.67,19.36-18.2,19.36h-124.71"}"
       />
+
+      
+
       <path
         class="walker-descend-left"
         d="m641.32,63.59h-123.21s-19.71.91-19.71,16.6c0,15.69,0,82.24,0,82.24,0,0-.67,19.36,18.2,19.36,18.87,0,124.71,0,124.71,0"
@@ -123,17 +128,11 @@
     transform: scaleX(0%);
   }
 
+  /* right side animates path rather than transforming */
   #elnino-walker-descend .walker-descend-right {
-    transform-box: fill-box;
-    transform-origin: right;
-    transition:
-      opacity 1.5s linear,
-      transform 1.5s ease-out;
-  }
-
-  #elnino-walker-descend.inNeutralState .walker-descend-right{
-    transform: scaleX(2.15);
-    
+    /* transform-box: fill-box;
+    transform-origin: right; */
+    transition: all 1.5s ease-out;
   }
 
 </style>
