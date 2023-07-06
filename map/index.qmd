@@ -8,7 +8,7 @@ format:
     css: svgmap.css
     anchor-sections: false
 resources:
-  - worldmap-interactive-test.svg
+  - storm-tower.png
 360embed:
   before: |
     &lt;iframe allow=&quot;fullscreen&quot; allowfullscreen=&quot;true&quot; src=&quot;

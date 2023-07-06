@@ -229,7 +229,7 @@
       0% { stroke-dashoffset: 0; }  
       100% { stroke-dashoffset: -6px; }
     }
-    #elnino-walker-ascend {
+    [id^="elnino-walker-ascend-"] {
       animation: 0.3s linear 0s infinite walkerascension;
     }
     
@@ -237,7 +237,7 @@
       0% { stroke-dashoffset: 0; }  
       100% { stroke-dashoffset: -13px; }
     }
-    #elnino-walker-descend {
+    #elnino-walker-sidesdescend {
       animation: 2.5s linear 0s infinite walkersidesdescend;
     }
   }
