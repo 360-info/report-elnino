@@ -1,11 +1,14 @@
 <script>
+  export let disableCirculation = false;
   export let inNeutralState = false;
 </script>
 
 <svg
   id="MapWalkerCirc"
   xmlns="http://www.w3.org/2000/svg"
-  viewBox="0 0 1098.37 444.18">
+  viewBox="0 0 1098.37 444.18"
+  class:disableCirculation
+  >
   <defs>
     <style>
       .walker-descend {
@@ -136,29 +139,33 @@
 <div
   id="explanation-1"
   class="explanation-box"
-  style:top="65%"
-  style:left="7.5%">
-  <h3>1</h3>
+  style:top="67.5%"
+  style:left="5%">
+  <h3>Normally</h3>
   <p>First part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco.</p>
 </div>
 <div
   id="explanation-2"
   class="explanation-box"
-  style:top="65%"
-  style:left="37.5%">
-  <h3>2</h3>
+  style:top="67.5%"
+  style:right="5%">
+  <h3>In El Niño</h3>
   <p>Second part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco.</p>
 </div>
-<div
+<!-- <div
   id="explanation-1"
   class="explanation-box"
   style:top="65%"
   style:left="67.5%">
   <h3>3</h3>
   <p>Third part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco.</p>
-</div>
+</div> -->
 
 <style>
+
+  .disableCirculation {
+    opacity: 0;
+  }
 
   /* general style */
 
@@ -233,7 +240,7 @@
   .explanation-box {
     position: absolute;
     box-sizing: content-box;
-    width: 25%;
+    width: 40%;
     padding: 10px;
     border-radius: 5px;
     background: #ffffffcc;
