@@ -19,6 +19,7 @@
   xmlns:xlink="http://www.w3.org/1999/xlink"
   viewBox="0 0 1098.37 444.18"
   on:click={mapClicked}
+  on:keyup={onKeyUp}
   ><defs
     ><style>
       .cls-1,

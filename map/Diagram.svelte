@@ -57,8 +57,10 @@
       activeButton = "walker-circulation-mid";
     }, 9000);
     stage2Timer = setTimeout(() => {
-      activeButton = "walker-circulation-end";
-    }, 18000);
+      activeButton = "none";
+      diagramTitle = undefined;
+      diagramSubtitle = undefined;
+    }, 20000);
   }
 
   // TODO - add aria attributes

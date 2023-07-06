@@ -3,14 +3,21 @@
   import { createEventDispatcher } from "svelte";
 
   // layerState: "hidden", "start", "mid", "end"
+  // (map shows neutral state first, then el nino state)
   export let layerState;
   let inNeutralState;
-  $: inNeutralState = ["mid", "end"].includes(layerState);
+  $: inNeutralState = layerState == "start";
 
   const dispatch = createEventDispatcher();
   function mapClicked() {
     console.log("Dispatching basemap click from Walker Circulation...");
     dispatch("mapClicked", { });
+  }
+  // wrapper handler for activateButton when Enter or space key is pressed
+  function onKeyUp(e) {
+    if (e.key == "Escape") {
+      mapClicked()
+    }
   }
 
 </script>
@@ -23,9 +30,41 @@
     class:deemphasised={layerState == "end"}
     transition:fade={{ duration: 300 }}
     on:click={mapClicked}
+    on:keyup={onKeyUp}
     >
     <g id="elnino-walker">
 
+      <!-- storm clouds to accompany ascend bits -->
+      <image
+        class="storm-tower"
+        class:inNeutralState
+        href="storm-tower.png"
+        style:height="150"
+        style:width="150"
+        style:y="30"
+        style:x={inNeutralState ? "190" : "190"}
+        style:opacity={inNeutralState ? "0.4" : "0.8"}
+        />
+      <image
+        class="storm-tower"
+        class:inNeutralState
+        href="storm-tower.png"
+        style:height="150"
+        style:width="150"
+        style:y="30"
+        style:x={inNeutralState ? "430" : "600"}
+        style:opacity="0.8"
+        />
+      <image
+        class="storm-tower"
+        class:inNeutralState
+        href="storm-tower.png"
+        style:height="150"
+        style:width="150"
+        style:y="30"
+        style:x={inNeutralState ? "915" : "740"}
+        style:opacity="0.8"
+        />
       <!-- new ascend bits here -->
       <g
         id="elnino-walker-ascend-seasia"
@@ -260,6 +299,13 @@
 
   .deemphasised {
     opacity: 0.2;
+  }
+  
+  /* storm clouds */
+  .storm-tower {
+    transition:
+      opacity 1.5s linear,
+      x 1.5s ease-out;
   }
 
 </style>
