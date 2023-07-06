@@ -9,13 +9,20 @@
   export let left;
   export let color = "#666666";
   export let iconScale = 0.6;
-  export let deemphasised = false;
+
+  // export let deemphasised = false;
   // export let borderRadius = "50%";
 
   // id, title and description passed back to global state on click
   export let buttonID;
   export let title = "";
   export let description = "";
+
+  // state: compare active button to this one
+  // - "shown", if activeButton matches x or is undefined
+  // - "deemphasised", if activeButton is a walker circulation start or mid
+  // - "hidden", if activebutton otherwise doesn't match x
+  export let layerState;
 
   /* event handlers: pass the id, title and desc props back on button push */
 
@@ -34,50 +41,54 @@
       activateButton()
     }
   }
+  
 
 </script>
 
-<div
-  on:click={activateButton}
-  on:keyup={onKeyUp}
-  role="button"
-  tabindex={tabindex}
-  class="mapbutton"
-  class:deemphasised
-  style:height={size + "px"}
-  style:width={size + "px"}
-  style:top={top}
-  style:left={left}
-  style:position="absolute"
-  style:background-color={color}
-  style:border-radius="50%"
-  style:padding-block="5px"
-  style:display="flex"
-  style:justify-content="center"
-  style:align-items="center"
-  style:text-align="center"
-  style:border="20px solid transparent"
-  style:background-clip="content-box"
-  style:filter="drop-shadow(0px 0px {size * 0.4}px {color}) {deemphasised ? "grayscale(50%) opacity(25%)" : ""}"
-  >
+
+{#if layerState != "hidden"}
   <div
+    on:click={activateButton}
+    on:keyup={onKeyUp}
+    role="button"
+    tabindex={tabindex}
+    class="mapbutton"
+    style:height={size + "px"}
+    style:width={size + "px"}
+    style:top={top}
+    style:left={left}
+    style:position="absolute"
+    style:background-color={color}
+    style:border-radius="50%"
+    style:padding-block="5px"
     style:display="flex"
-    style:flex-flow="row nowrap"
     style:justify-content="center"
     style:align-items="center"
-    style:align-content="center"
+    style:text-align="center"
+    style:border="20px solid transparent"
+    style:background-clip="content-box"
+    style:filter="drop-shadow(0px 0px {size * 0.4}px {color}) {
+      layerState == "deemphasised" ? "grayscale(50%) opacity(25%)" : ""}"
     >
-    <Icon
-      icon={icon}
-      width={size * iconScale}  
-      style="color: white; position: static;"
-     />
-     <!-- <h4
-      style:color="white"
-      style:font-size="1vw"
-     >{title}</h4> -->
+    <div
+      style:display="flex"
+      style:flex-flow="row nowrap"
+      style:justify-content="center"
+      style:align-items="center"
+      style:align-content="center"
+      >
+      <Icon
+        icon={icon}
+        width={size * iconScale}  
+        style="color: white; position: static;"
+      />
+      <!-- <h4
+        style:color="white"
+        style:font-size="1vw"
+      >{title}</h4> -->
+    </div>
   </div>
-</div>
+{/if}
 
 <style>
   .mapbutton {

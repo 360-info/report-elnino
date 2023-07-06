@@ -1,11 +1,11 @@
 <script>
   import { fade } from "svelte/transition";
 
-  // state: shown, deemphasised, disabled
+  // state: shown, deemphasised, hidden
   export let layerState;
 </script>
 
-{#if layerState != "disabled"}
+{#if layerState != "hidden"}
 <svg
   id="MapSSTs"
   class:deemphasised={layerState == "deemphasised"}
