@@ -9,7 +9,7 @@
 <meta name="author" content="James Goldie &amp; Michael Joiner, 360info">
 <meta name="description" content="An interactive map of El Niño impacts across the globe.">
 
-<title>El Niño: global impacts</title>
+<title>El Niño impacts</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,40 +23,6 @@ ul.task-list li input[type="checkbox"] {
   vertical-align: middle;
 }
 .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -81,206 +47,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <header id="title-block-header">
-<h1 class="title">El Niño: global impacts</h1>
+<h1 class="title">El Niño impacts</h1>
 <p class="author">James Goldie &amp; Michael Joiner, 360info</p>
 
 </header>
 
-<!-- popup buttons (inlined due to include/sverto conflict) -->
-<div class="modalpanel">
-<div class="modalpanelitems">
-<!-- check https://icons.getbootstrap.com for icons! -->
-
-<a href="#" data-micromodal-trigger="modal-useremix" aria-label="Share dialog" role="button" tabindex="0">
-  <i class="bi bi-share-fill"></i>
-</a>
-
-<a href="#" data-micromodal-trigger="modal-about" aria-label="More information" role="button" tabindex="0">
-  <i class="bi bi-info-circle-fill"></i>
-</a>
-
-<a id="fullscreenButton" aria-label="Fullscreen" role="button" href="#" tabindex="0">
-  <span class="fsoff">
-    <i class="bi bi-arrows-fullscreen"></i>
-  </span>
-</a>
-
-<!-- full screen button script -->
-<script>
-  window.addEventListener("load", () => {
-    document.querySelector("#fullscreenButton").addEventListener("click", e => {
-      e.preventDefault();
-      console.log("FS button clicked!");
-
-      var fsBtn = document.querySelector("#fullscreenButton");
-
-      if (fsBtn.classList.contains("fsmode")) {
-        // fullscreen is on: disable it
-        document.exitFullscreen();
-        fsBtn.classList.remove("fsmode")
-      } else {
-        // fullscreen is off: enable it
-        var rootEl = document.documentElement;
-
-        var requestMethod =
-          rootEl.requestFullScreen ||
-          rootEl.webkitRequestFullScreen ||
-          rootEl.mozRequestFullScreen ||
-          rootEl.msRequestFullScreen;
-
-          if (requestMethod) {
-            requestMethod.call(rootEl);
-            fsBtn.classList.add("fsmode");
-          } else {
-            alert("Fullscreen mode isn't supported on this browser.")
-          }
-      }
-    });
-  })
-</script>
-</div>
-</div>
-<!-- finally, here's the EDITOR SHARE button. it's a quick way to copy the
-     embed code for editors and will only appear if ?edshare=true is in the
-     url (that way it'll appear on the newswire but not subsequent shares) -->
-<div id="edshare">
-  <i id="edshare-icon" class="bi bi-clipboard2-plus-fill"></i>
-  <div>
-    <h4 id="edshare-title">GET THIS MAP</h4>
-    <p id="edshare-description">Click to copy this into your story</p>
-  </div>
-</div>
-<!-- editor share banner: enable if ?edshare is in the url -->
-<script>
-  window.addEventListener("load", () => {
-    pageURL = new URL(window.location.href);
-    edshare = pageURL.searchParams.get("edshare");
-    
-    edshareBtn = document.querySelector("#edshare");
-    if (edshare === null) {
-      edshareBtn.style.display = "none";
-    } else {
-    
-      edshareBtn.classList.add("ready");
-    
-      edshareBtn.addEventListener("click", () => {
-
-        // copy the embed code to the clipboard
-        navigator.clipboard.writeText(
-          `<iframe allow="fullscreen; clipboard-write self https://jul2023.360info-elnino.pages.dev" allowfullscreen="true" src="https://jul2023.360info-elnino.pages.dev/map/" title="Interactive: El Niño: global impacts" style="width:100%; height:0; padding-top: 56.25%; border:none; background-color: white;" scrolling="no"></iframe>`);
-
-        // update button styles and content
-        edshareBtn.classList.remove("ready");
-        edshareBtn.classList.add("clicked");
-
-        edshareIcon = document.querySelector("#edshare-icon");
-        edshareIcon.removeAttribute("class");
-        edshareIcon.classList.add("bi");
-        edshareIcon.classList.add("bi-check");
-
-        edshareTitle = document.querySelector("#edshare-title");
-        edshareTitle.innerText = "COPIED!";
-
-        edshareDescription = document.querySelector("#edshare-description");
-        edshareDescription.innerHTML =
-          `Paste this interactive with the <i class="bi bi-code-square"></i> Embed button in your story editor.</br></br>
-          
-          Please remember to <strong>attribute 360info and our data sources.</strong>`
-
-        // button exit animation
-        setTimeout(() => {  edshareBtn.classList.add("done"); }, 5000);
-        setTimeout(() => {  edshareBtn.style.display = "none"; }, 7000);
-      });
-    }
-  });
-</script>
-<!-- interactive begins -->
-<div id="map">
-
-</div>
-<div class="cell">
-<div class="sourceCode cell-code hidden" id="cb1" data-startfrom="150" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 149;"><span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a>Diagram <span class="op">=</span> <span class="im">import</span>(<span class="st">"./../../map/Diagram.js"</span>)</span>
-<span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a>myDiagram <span class="op">=</span> <span class="kw">new</span> Diagram<span class="op">.</span><span class="fu">default</span>({</span>
-<span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a>  <span class="co">// props: {},</span></span>
-<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a>  <span class="dt">target</span><span class="op">:</span> <span class="bu">document</span><span class="op">.</span><span class="fu">querySelector</span>(<span class="st">"#map"</span>)</span>
-<span id="cb1-154"><a href="#cb1-154" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<div id="ojs-cell-1-1" data-nodetype="declaration">
-
-</div>
-</div>
-</div>
-<div class="cell-output cell-output-display">
-<div>
-<div id="ojs-cell-1-2" data-nodetype="declaration">
-
-</div>
-</div>
-</div>
-</div>
-<!-- popup dialogs (inlined due to include/sverto conflict) -->
-<!-- initialise miromodal.js -->
-<div class="cell" data-include="false">
-<div class="sourceCode cell-code hidden" id="cb2" data-startfrom="163" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 162;"><span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>micro <span class="op">=</span> <span class="pp">require</span>(<span class="st">"micromodal@0.4.10"</span>)</span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>micro<span class="op">.</span><span class="fu">init</span>({</span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>  <span class="dt">awaitOpenAnimation</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>  <span class="dt">awaitCloseAnimation</span><span class="op">:</span> <span class="kw">true</span></span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display hidden">
-<div>
-<div id="ojs-cell-2-1" data-nodetype="declaration">
-
-</div>
-</div>
-</div>
-<div class="cell-output cell-output-display hidden">
-<div>
-<div id="ojs-cell-2-2" data-nodetype="expression">
-
-</div>
-</div>
-</div>
-</div>
-<div id="modal-useremix" class="modal micromodal-slide" aria-hidden="true">
-<div class="modal__overlay" tabindex="-1" data-micromodal-close="true">
-<div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-useremix-title">
-<button class="modal__close" aria-label="Close modal" data-micromodal-close="">
-</button>
-<div id="modal-useremix-content">
-<h2 id="use-remix">Use + Remix</h2>
-<p>These charts, as well as the analyses that underpin them, are available under a <a href="https://creativecommons.org/licenses/by/4.0"><strong>Creative Commons Attribution 4.0 licence</strong></a>.</p>
-<p>Please acknowledge <a href="https://360info.org">360info</a> and our data sources when you use these charts and data.</p>
-<h4 id="embed-this-chart-in-your-article">Embed this chart in your article</h4>
-<p>Copy and paste the following code:</p>
-<div class="embedcode">
-<pre><code>&lt;iframe allow="fullscreen; clipboard-write self https://jul2023.360info-elnino.pages.dev" allowfullscreen="true" src="https://jul2023.360info-elnino.pages.dev/map/" title="Interactive: El Niño: global impacts" style="width:100%; height:0; padding-top: 56.25%; border:none; background-color: white;" scrolling="no"&gt;&lt;/iframe&gt;</code></pre>
-</div>
-<p>This content is subject to <a href="https://newshub.360info.org/page/terms">360info’s Terms of Use</a>.</p>
-<h4 id="get-the-data-and-code">Get the data and code</h4>
-<p>Visit the <a href="https://github.com/360-info/report-template/tree/main/data">GitHub repository</a> to:</p>
-<ul>
-<li><a href="https://github.com/360-info/report-template/tree/main/data"><strong>Download the data</strong></a></li>
-<li><a href="https://github.com/360-info/report-template"><strong>Recreate or remix the chart</strong></a></li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<!-- notes dialog -->
-<div id="modal-about" class="modal micromodal-slide" aria-hidden="true">
-<div class="modal__overlay" tabindex="-1" data-micromodal-close="true">
-<div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-about-title">
-<button class="modal__close" aria-label="Close modal" data-micromodal-close="">
-</button>
-<header>
-<h2 id="modal-about-title">About</h2>
-</header>
-<div id="modal-about-content">
-<p>This is a great place to add some more notes on the data!</p>
-</div>
-</div>
-</div>
+<div style="position:relative; padding-bottom: 70%">
+<iframe allow="fullscreen; clipboard-write self https://360info-elnino.pages.dev" allowfullscreen="true" src="https://360info-elnino.pages.dev/map/" title="Interactive: El Niño impacts" style="width:100%; height:100%; position: absolute; top: 0; left: 0; border:none; background-color: white; " scrolling="no">
+</iframe>
 </div>
 
 <script type="ojs-module-contents">

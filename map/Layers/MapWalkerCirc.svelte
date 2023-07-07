@@ -182,11 +182,11 @@
     transition:fade={{ duration: 300 }}
     role="figure"
     aria-label="In neutral years"
-    aria-description="First part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco."
+    aria-description="Air flows across the Pacific from east to west, rising over Southeast Asia to cause storms and rainfall and then circulating back east."
     style:top="62.5%"
     style:left="5%">
     <h3>In neutral years</h3>
-    <p>First part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco.</p>
+    <p>Air flows across the Pacific from east to west, rising over Southeast Asia to cause storms and rainfall and then circulating back east.</p>
   </output>
 {/if}
 {#if ["mid", "end"].includes(layerState)}
@@ -196,12 +196,12 @@
     transition:fade={{ duration: 300 }}
     role="figure"
     aria-label="In El Niño years"
-    aria-description="Second part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco."
+    aria-description="In an En Niño, this circulation is disrupted. Ocean water gets warmer in the west and cooler in the east. Warmer water evaporates more, promoting storms and rainfall further east and drier conditions in the west."
     class:deemphasised={layerState == "end"}
     style:top="62.5%"
     style:right="5%">
     <h3>In El Niño</h3>
-    <p>Second part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco.</p>
+    <p>In an En Niño, this circulation is disrupted. Ocean water gets warmer in the west and cooler in the east. Warmer water evaporates more, promoting storms and rainfall further east and drier conditions in the west.</p>
 </output>
 {/if}
 

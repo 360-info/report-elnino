@@ -132,7 +132,7 @@
     />
     <Button
      icon="material-symbols:cancel"
-     top="10%" left="55%" color="#dd0000"
+     top="10%" left="53.5%" color="#dd0000"
      size={buttonSize * 0.8}
      borderRadius="0"
      title="Cancel"
@@ -151,7 +151,7 @@
       size={buttonSize}
       buttonID="africa-rain"
       title="Rain in Eastern Africa"
-      description="Here're some facts about that..."
+      description="After three years of La Niña, drought in Somalia is the worst it’s been in decades — described as <a href='https://public.wmo.int/en/media/news/climate-change-made-horn-of-africa-drought-and-mediterranean-heat-%E2%80%9C100-times-more-likely%E2%80%9D'>“100 times more likely”</a> because of climate change by the World Meteorological Organization.<br><br>An El Niño could provide relief — but extreme, flooding rains are also possible, which may be little relief at all."
       on:buttonActivate={updateTitleBlock}
       layerState={
         (activeButton == "none" || activeButton == "africa-rain") ?
@@ -168,7 +168,7 @@
       size={buttonSize}
       buttonID="india-drought"
       title="Drought in India"
-      description="Here're some facts about that..."
+      description="Every year around June, the winds around India change, bringing rain from the Indian Ocean. This monsoon rainfall is critical to many of India’s <em>kharif</em> crops, which grow at this time of year.<br><br>El Niño often disrupts the timing or intensity of the monsoon, making rainfall scarcer and less predictable."
       on:buttonActivate={updateTitleBlock}
       layerState={
         (activeButton == "none" || activeButton == "india-drought") ?
@@ -185,7 +185,7 @@
       size={buttonSize}
       buttonID="seasia-haze"
       title="Haze in SE Asia"
-      description="Here're some other facts about haze. Fugiat aute mollit sunt do excepteur deserunt. Et et ipsum amet quis cupidatat do deserunt deserunt laboris esse."
+      description="Fires from land clearing and other activities cause a smokey haze to drift across countries in Southeast Asia. El Niño can exacerbate the haze by making the land drier and more fire-prone, as the altered winds move rainfall away from Asia.<br><br>The airborne pollutants from smoke haze can cause respiratory disease, and El Niño often brings other temperature-related impacts, like increases in heat stroke and vector-borne diseases like malaria and dengue."
       on:buttonActivate={updateTitleBlock}
       layerState={
         (activeButton == "none" || activeButton == "seasia-haze") ?
@@ -202,7 +202,7 @@
       size={buttonSize}
       buttonID="drought-seaus"
       title="Drought in SE Australia"
-      description="Drought is interesting for several reasons! Aute enim cillum irure reprehenderit tempor commodo nostrud laboris."
+      description="Southeastern Australia is often drier and warmer during an El Niño. This is a problem for farmers, who rely on steady rainfall for growth."
       on:buttonActivate={updateTitleBlock}
       layerState={
         (activeButton == "none" || activeButton == "drought-seaus") ?
@@ -218,7 +218,7 @@
       size={buttonSize}
       buttonID="fire-seaus"
       title="Fire in SE Australia"
-      description="Here're some other facts about fire. Eu aliqua nostrud fugiat cillum. In elit cupidatat sunt anim cupidatat nulla dolore. Reprehenderit eu dolor culpa ad. Mollit amet eu et ad dolore."
+      description="Southeastern Australia is often drier and warmer during an El Niño. This elevates fire risk in the Australian summer, as drier vegetation is more likely to catch fire and is harder to put out in hotter or windier conditions."
       on:buttonActivate={updateTitleBlock}
       layerState={
         (activeButton == "none" || activeButton == "fire-seaus") ?
@@ -233,8 +233,8 @@
       top="34%" left="48%" color="#0095d0" iconScale=0.5
       size={buttonSize}
       buttonID="tropcyc-neaus"
-      title="Fewer tropical cyclones in northern Australia"
-      description="In pariatur officia commodo Lorem enim enim nostrud velit sint dolore labore amet. Ea voluptate Lorem et id et laborum fugiat id eiusmod ad. Irure ea cupidatat voluptate quis. Lorem non velit nulla."
+      title="Tropical cyclones ↓ in nth Australia"
+      description="On average, tropical cyclones (called <em>typhoons</em> or <em>hurricanes</em> elsewhere) tend to be less frequent near Australia during an El Niño."
       on:buttonActivate={updateTitleBlock}
       layerState={
         (activeButton == "none" || activeButton == "tropcyc-neaus") ?
@@ -251,7 +251,8 @@
       size={buttonSize}
       buttonID="drought-spac"
       title="Drought in the south Pacific"
-      description="Drought is interesting for several reasons! it could be different in the Pacific, though, where water storages are incredibly important."
+      description="Like south-eastern Australia, Pacific Islands often <a href='https://doi.org/10.1007/s10584-021-03112-1'>get less rainfall</a> during an El Niño, contributing to drought conditions.<br><br>Droughts often mean residents need to travel further to find water, or even hire trucks to deliver it from elsewhere. Food security is also impacted — and some islands with mountainous regions can be impacted by frosts at the same time.
+      "
       on:buttonActivate={updateTitleBlock}
       layerState={
         (activeButton == "none" || activeButton == "drought-spac") ?
@@ -266,8 +267,8 @@
       top="32%" left="71%" color="#0095d0" iconScale=0.5
       size={buttonSize}
       buttonID="hurricane-pac"
-      title="Hurricanes in the Pacific"
-      description="Parts of the Pacific that sit near the zone of shifted convection often have to deal with more hurricanes than average during El Niños."
+      title="Hurricanes ↑ in east Pacific"
+      description="The eastern and central Pacific tend to see more hurricanes during an El Niño, as warmer waters are the fuel that sustains a hurricane."
       on:buttonActivate={updateTitleBlock}
       layerState={
         (activeButton == "none" || activeButton == "hurricane-pac") ?
@@ -283,8 +284,8 @@
       top="18%" left="68%" color="#005bd0"
       size={buttonSize}
       buttonID="flood-seusa"
-      diagramTitle = "Extreme rain in the south-eastern US"
-      description="Extreme rainfall can be debilitating, risking homes and lives in flooding. Minim officia proident anim aliqua."
+      diagramTitle = "Extreme rain in SW USA"
+      description="Jet streams are fast streams of air that wrap around the Earth, high up in the atmosphere. El Niño diverts the subtropical northern hemisphere jet over the southwestern US, where it often brings extreme rainfall and flooding to states like California."
       on:buttonActivate={updateTitleBlock}
       layerState={
         (activeButton == "none" || activeButton == "flood-seusa") ?
@@ -299,8 +300,8 @@
       top="15%" left="82%" color="#0095d0" iconScale=0.5
       size={buttonSize}
       buttonID="hurricane-alt"
-      diagramTitle = "Hurricanes in the Atlantic"
-      description="The Atlantic Ocean often sees quieter hurricane seasons during El Niños, with fewer hurricanes than in a typical year. The ocean is so hot this year, however, that US authorities are forecasting an average hurricane season."
+      diagramTitle = "Hurricanes ↓ in nth Atlantic"
+      description="On average, hurricanes (called <em>typhoons</em> or <em>tropical cyclones</em> elsewhere) tend to be less frequent in the North Atlantic Ocean during an El Niño.<br><br>However, this year NOAA has forecast an average hurricane season despite the El Niño. This is because the North Atlantic is very warm, promoting hurricane activity."
       on:buttonActivate={updateTitleBlock}
       layerState={
         (activeButton == "none" || activeButton == "hurricane-alt") ?
@@ -317,7 +318,7 @@
       size={buttonSize}
       buttonID="foodsec-stham"
       diagramTitle = "Food security in Sth America"
-      description="Sunt laborum reprehenderit anim aliqua nisi fugiat amet eiusmod consequat aute non ipsum. Esse id cupidatat nisi id aliquip. Exercitation deserunt labore laboris irure voluptate ea voluptate."
+      description="El Niño was <a href='https://earthobservatory.nasa.gov/features/ElNino/page3.php'>named hundreds of years ago by Peruvian fishers</a>, who noticed a change in the currents that would bring hot water and a smaller catch.<br><br>El Niño continues to impact catches and change the species available to fisheries off the coast of South America."
       on:buttonActivate={updateTitleBlock}
       layerState={
         (activeButton == "none" || activeButton == "foodsec-stham") ?
@@ -340,15 +341,15 @@
     id="map-description-title"
     class="title-{sizeClass}"
     >
-    {diagramTitle || "El Niño: global impacts"}
+    {diagramTitle || "El Niño impacts"}
   </h2>
   {/key}
   {#key diagramSubtitle}
   <p
     in:fly={{ y: 20, duration: 200, delay: 200 }}
     out:fly={{ y: 20, duration: 200 }}
-    id="map-description-desc">
-    {diagramSubtitle || "James Goldie & Michael Joiner, 360info"}
+    class="description-{sizeClass}">
+    {@html diagramSubtitle || "James Goldie & Michael Joiner, 360info"}
   </p>
   {/key}
 </output>
@@ -383,5 +384,10 @@
   #map-description h2.title-large   { font-size: 275%; }
   #map-description h2.title-medium  { font-size: 225%; }
   #map-description h2.title-small   { font-size: 150%; }
+
+  #map-description p.description-x-large { font-size: 120%; }
+  #map-description p.description-large   { font-size: 100%; }
+  #map-description p.description-medium  { font-size: 80%; }
+  #map-description p.description-small   { font-size: 70%; }
 
 </style>

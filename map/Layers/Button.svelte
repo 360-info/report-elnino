@@ -11,7 +11,7 @@
   export let iconScale = 0.6;
 
   // export let deemphasised = false;
-  // export let borderRadius = "50%";
+  export let borderRadius = "50%";
 
   // id, title and description passed back to global state on click
   export let buttonID;
@@ -61,7 +61,7 @@
     style:left={left}
     style:position="absolute"
     style:background-color={color}
-    style:border-radius="50%"
+    style:border-radius={borderRadius}
     style:padding-block="5px"
     style:display="flex"
     style:justify-content="center"
