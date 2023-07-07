@@ -1,6 +1,5 @@
 ---
-title: El Niño impacts
-# subtitle: Click on regional hotspots to learn more about the impacts of El Niño
+title: "El Niño: global impacts"
 description: An interactive map of El Niño impacts across the globe.
 author: James Goldie & Michael Joiner, 360info
 format:
@@ -11,11 +10,11 @@ resources:
   - storm-tower.png
 360embed:
   before: |
-    &lt;iframe allow=&quot;fullscreen&quot; allowfullscreen=&quot;true&quot; src=&quot;
+    &lt;iframe allow=&quot;fullscreen; clipboard-write self https://jul2023.360info-elnino.pages.dev&quot; allowfullscreen=&quot;true&quot; src=&quot;
   # uncomment and modify this line for production
-  # url: https://feb2023.360info-heatmaps-narclim.pages.dev/news/
+  url: https://jul2023.360info-elnino.pages.dev/map/
   after: |
-    &quot; title=&quot;Interactive: future heat&quot; style=&quot;width:100%; height:500px; border:none; background-color: white;&quot; scrolling=&quot;no&quot;&gt;&lt;/iframe&gt;
+    &quot; title=&quot;Interactive: El Niño: global impacts&quot; style=&quot;width:100%; height:0; padding-top: 56.25%; border:none; background-color: white;&quot; scrolling=&quot;no&quot;&gt;&lt;/iframe&gt;
 ---
 
 :::{}
