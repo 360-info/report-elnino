@@ -17,10 +17,6 @@ resources:
     &quot; title=&quot;Interactive: El Niño: global impacts&quot; style=&quot;width:100%; height:100%; position: absolute; top: 0; left: 0; border:none; background-color: white;&quot; scrolling=&quot;no&quot;&gt;&lt;/iframe&gt;&gt;&lt;/div&gt;
 ---
 
-:::{=html}
-<div style="position:relative; padding-bottom: 70%"><iframe allow="fullscreen; clipboard-write self https://360info-elnino.pages.dev" allowfullscreen="true" src="https://360info-elnino.pages.dev/map/" title="Interactive: El Niño impacts" style="width:100%; height:100%; position: absolute; top: 0; left: 0; border:none; background-color: white; " scrolling="no"></iframe></div>
-:::
-
 :::{}
 {{< include /.sverto/map/index.qmd >}}
 :::
