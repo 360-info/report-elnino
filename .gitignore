@@ -18,3 +18,8 @@ Thumbs.db
 # output folder (you may want to exclude files when we publish!)
 /out/*
 !/out
+
+/.luarc.json
+
+# sverto
+/.sverto/

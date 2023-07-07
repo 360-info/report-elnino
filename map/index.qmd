@@ -1,0 +1,227 @@
+---
+title: "El Niño: global impacts"
+description: An interactive map of El Niño impacts across the globe.
+author: James Goldie & Michael Joiner, 360info
+format:
+  sverto-html:
+    css: svgmap.css
+    anchor-sections: false
+resources:
+  - storm-tower.png
+360embed:
+  before: |
+    &lt;iframe allow=&quot;fullscreen; clipboard-write self https://jul2023.360info-elnino.pages.dev&quot; allowfullscreen=&quot;true&quot; src=&quot;
+  # uncomment and modify this line for production
+  url: https://jul2023.360info-elnino.pages.dev/map/
+  after: |
+    &quot; title=&quot;Interactive: El Niño: global impacts&quot; style=&quot;width:100%; height:0; padding-top: 56.25%; border:none; background-color: white;&quot; scrolling=&quot;no&quot;&gt;&lt;/iframe&gt;
+---
+
+:::{}
+{{< include /.sverto/map/index.qmd >}}
+:::
+
+<!-- popup buttons (inlined due to include/sverto conflict) -->
+
+:::: {.modalpanel}
+
+::: {.modalpanelitems}
+
+```{=html}
+<!-- check https://icons.getbootstrap.com for icons! -->
+
+<a href="#" data-micromodal-trigger="modal-useremix" aria-label="Share dialog" role="button" tabindex="0">
+  <i class="bi bi-share-fill"></i>
+</a>
+
+<a href="#" data-micromodal-trigger="modal-about" aria-label="More information" role="button" tabindex="0">
+  <i class="bi bi-info-circle-fill"></i>
+</a>
+
+<a id="fullscreenButton" aria-label="Fullscreen" role="button" href="#"  tabindex="0">
+  <span class="fsoff">
+    <i class="bi bi-arrows-fullscreen"></i>
+  </span>
+</a>
+
+<!-- full screen button script -->
+<script>
+  window.addEventListener("load", () => {
+    document.querySelector("#fullscreenButton").addEventListener("click", e => {
+      e.preventDefault();
+      console.log("FS button clicked!");
+
+      var fsBtn = document.querySelector("#fullscreenButton");
+
+      if (fsBtn.classList.contains("fsmode")) {
+        // fullscreen is on: disable it
+        document.exitFullscreen();
+        fsBtn.classList.remove("fsmode")
+      } else {
+        // fullscreen is off: enable it
+        var rootEl = document.documentElement;
+
+        var requestMethod =
+          rootEl.requestFullScreen ||
+          rootEl.webkitRequestFullScreen ||
+          rootEl.mozRequestFullScreen ||
+          rootEl.msRequestFullScreen;
+
+          if (requestMethod) {
+            requestMethod.call(rootEl);
+            fsBtn.classList.add("fsmode");
+          } else {
+            alert("Fullscreen mode isn't supported on this browser.")
+          }
+      }
+    });
+  })
+</script>
+```
+:::
+::::
+
+<!-- finally, here's the EDITOR SHARE button. it's a quick way to copy the
+     embed code for editors and will only appear if ?edshare=true is in the
+     url (that way it'll appear on the newswire but not subsequent shares) -->
+
+```{=html}
+<div id="edshare">
+  <i id="edshare-icon" class="bi bi-clipboard2-plus-fill"></i>
+  <div>
+    <h4 id="edshare-title">GET THIS MAP</h4>
+    <p id="edshare-description">Click to copy this into your story</p>
+  </div>
+</div>
+```
+
+<!-- editor share banner: enable if ?edshare is in the url -->
+```{=html}
+<script>
+  window.addEventListener("load", () => {
+    pageURL = new URL(window.location.href);
+    edshare = pageURL.searchParams.get("edshare");
+    
+    edshareBtn = document.querySelector("#edshare");
+    if (edshare === null) {
+      edshareBtn.style.display = "none";
+    } else {
+    
+      edshareBtn.classList.add("ready");
+    
+      edshareBtn.addEventListener("click", () => {
+
+        // copy the embed code to the clipboard
+        navigator.clipboard.writeText(
+          `{{< meta 360embed.before >}}{{< meta 360embed.url >}}{{< meta 360embed.after >}}`);
+
+        // update button styles and content
+        edshareBtn.classList.remove("ready");
+        edshareBtn.classList.add("clicked");
+
+        edshareIcon = document.querySelector("#edshare-icon");
+        edshareIcon.removeAttribute("class");
+        edshareIcon.classList.add("bi");
+        edshareIcon.classList.add("bi-check");
+
+        edshareTitle = document.querySelector("#edshare-title");
+        edshareTitle.innerText = "COPIED!";
+
+        edshareDescription = document.querySelector("#edshare-description");
+        edshareDescription.innerHTML =
+          `Paste this interactive with the <i class="bi bi-code-square"></i> Embed button in your story editor.</br></br>
+          
+          Please remember to <strong>attribute 360info and our data sources.</strong>`
+
+        // button exit animation
+        setTimeout(() => {  edshareBtn.classList.add("done"); }, 5000);
+        setTimeout(() => {  edshareBtn.style.display = "none"; }, 7000);
+      });
+    }
+  });
+</script>
+```
+
+<!-- interactive begins -->
+
+:::{#map}
+:::
+
+```{ojs}
+Diagram = import_svelte("Diagram.svelte")
+myDiagram = new Diagram.default({
+  // props: {},
+  target: document.querySelector("#map")
+})
+```
+
+<!-- popup dialogs (inlined due to include/sverto conflict) -->
+
+<!-- initialise miromodal.js -->
+
+```{ojs}
+//| include: false
+micro = require("micromodal@0.4.10")
+micro.init({
+  awaitOpenAnimation: true,
+  awaitCloseAnimation: true
+});
+```
+
+::::::: {#modal-useremix .modal .micromodal-slide aria-hidden="true"}
+:::::: {.modal__overlay tabindex="-1" data-micromodal-close="true"}
+::::: {.modal__container role="dialog" aria-modal="true" aria-labelledby="modal-useremix-title"}
+
+<button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
+
+:::: {#modal-useremix-content}
+## Use + Remix
+
+These charts, as well as the analyses that underpin them, are available under a [**Creative Commons Attribution 4.0 licence**](https://creativecommons.org/licenses/by/4.0).
+
+Please acknowledge [360info](https://360info.org) and our data sources when you use these charts and data.
+
+#### Embed this chart in your article
+
+Copy and paste the following code:
+
+::: {.embedcode}
+```
+{{< meta 360embed.before >}}{{< meta 360embed.url >}}{{< meta 360embed.after >}}
+```
+
+:::
+
+This content is subject to [360info's Terms of Use](https://newshub.360info.org/page/terms).
+
+#### Get the data and code
+
+Visit the [GitHub repository](https://github.com/360-info/report-template/tree/main/data) to:
+
+* [**Download the data**](https://github.com/360-info/report-template/tree/main/data)
+* [**Recreate or remix the chart**](https://github.com/360-info/report-template)
+::::
+
+:::::
+::::::
+:::::::
+
+<!-- notes dialog -->
+
+::::::: {#modal-about .modal .micromodal-slide aria-hidden="true"}
+:::::: {.modal__overlay tabindex="-1" data-micromodal-close="true"}
+::::: {.modal__container role="dialog" aria-modal="true" aria-labelledby="modal-about-title"}
+
+<button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
+
+<header>
+## About {#modal-about-title}
+</header>
+
+:::: {#modal-about-content}
+This is a great place to add some more notes on the data!
+::::
+
+:::::
+::::::
+:::::::
