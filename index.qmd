@@ -402,7 +402,6 @@ It's interesting to see that yield variability has increased substantially in th
 
 india_crops |>
   filter(
-    crop %in% c("Rice", "Maize"),
     rainfall_region == "Peninsular India") |>
   group_by(year) |>
   summarise(
@@ -415,9 +414,9 @@ india_crops |>
   left_join(enso_jjas, by = join_by(year)) |>
   filter(!is.na(yield_kg_per_ha), !is.na(mean_soi)) ->
   # write_csv(here("data", "india-ricemaize-peninsular.csv")) ->
-india_ricemaize_peninsular
+india_allcrops_peninsular
 
-ggplot(india_ricemaize_peninsular) +
+ggplot(india_allcrops_peninsular) +
   aes(x = year, y = yield_kg_per_ha) +
   geom_line(colour = "#eeeeee", linewidth = 0.5) +
   geom_point(aes(colour = phase_nino34)) +
@@ -431,7 +430,7 @@ ggplot(india_ricemaize_peninsular) +
     panel.grid.minor.x = element_blank()) +
   labs(
     x = NULL, y = "Yield (kg per ha)",
-    title = "Rice and maize yield in Peninsular India",
+    title = "Crop yield in Peninsular India",
     subtitle = "Highlighted by ENSO phase")
 ```
 
@@ -455,23 +454,27 @@ india_allcrops_byregion |>
   unnest(data) ->
 india_allcrops_byregion_resid
 
-india_ricemaize_peninsular |>
+india_allcrops_peninsular |>
   filter(!is.na(yield_kg_per_ha), !is.na(mean_soi)) |>
   loess(yield_kg_per_ha ~ year, data = _) |>
   augment() |>
-  left_join(india_ricemaize_peninsular,
+  left_join(india_allcrops_peninsular,
     join_by(year == year, yield_kg_per_ha == yield_kg_per_ha)) |>
-  write_csv(here("data", "india-ricemaize-peninsular.csv")) ->
-india_ricemaize_peninsular_reisd
+  write_csv(here("data", "india-allcrops-peninsular.csv")) ->
+india_allcrops_peninsular_resid
 
-india_ricemaize_peninsular_reisd |>
+india_allcrops_peninsular_resid |>
   mutate(
-    elnino = if_else(phase_nino34 == "elnino", yield_kg_per_ha, NA_real_),
-    neutral = if_else(phase_nino34 == "neutral", yield_kg_per_ha, NA_real_),
-    lanina = if_else(phase_nino34 == "lanina", yield_kg_per_ha, NA_real_)) |>
-  select(year, .fitted, .resid, elnino, neutral, lanina) |>
+    elnino_yield = if_else(phase_nino34 == "elnino", yield_kg_per_ha, NA_real_),
+    neutral_yield = if_else(phase_nino34 == "neutral", yield_kg_per_ha, NA_real_),
+    lanina_yield = if_else(phase_nino34 == "lanina", yield_kg_per_ha, NA_real_),
+    elnino_resid = if_else(phase_nino34 == "elnino", yield_kg_per_ha, NA_real_),
+    neutral_resid = if_else(phase_nino34 == "neutral", yield_kg_per_ha, NA_real_),
+    lanina_resid = if_else(phase_nino34 == "lanina", yield_kg_per_ha, NA_real_),
+    ) |>
+  select(year, .fitted, .resid, ends_with("yield"), ends_with("resid")) |>
   print(n = Inf) |>
-  write_csv(here("data", "flourish-ricemaize.csv"), na = "")
+  write_csv(here("data", "flourish-peninsular-allcrops.csv"), na = "")
 
 ggplot(india_allcrops_byregion_resid) +
   aes(x = rainfall_region, y = .resid) +
