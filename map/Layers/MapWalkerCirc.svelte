@@ -175,28 +175,34 @@
 {/if}
 
 {#if layerState != "hidden"}
-  <div
+  <output
     id="explanation-1"
     class="explanation-box"
     class:deemphasised={layerState == "end"}
     transition:fade={{ duration: 300 }}
-    style:top="67.5%"
+    role="figure"
+    aria-title="In neutral years"
+    aria-description="First part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco."
+    style:top="62.5%"
     style:left="5%">
-    <h3>Normally</h3>
+    <h3>In neutral years</h3>
     <p>First part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco.</p>
-  </div>
+  </output>
 {/if}
 {#if ["mid", "end"].includes(layerState)}
-  <div
+  <output
     id="explanation-2"
     class="explanation-box"
     transition:fade={{ duration: 300 }}
+    role="figure"
+    aria-title="In El Niño years"
+    aria-description="Second part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco."
     class:deemphasised={layerState == "end"}
-    style:top="67.5%"
+    style:top="62.5%"
     style:right="5%">
     <h3>In El Niño</h3>
     <p>Second part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco.</p>
-</div>
+</output>
 {/if}
 
 <style>
@@ -276,6 +282,7 @@
 
   /* text box styling */
   .explanation-box {
+    display: block;
     position: absolute;
     box-sizing: content-box;
     width: 40%;

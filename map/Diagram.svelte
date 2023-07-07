@@ -55,7 +55,7 @@
     // other stages on timer
     stage1Timer = setTimeout(() => {
       activeButton = "walker-circulation-mid";
-    }, 9000);
+    }, 10000);
     stage2Timer = setTimeout(() => {
       activeButton = "none";
       diagramTitle = undefined;
@@ -332,7 +332,7 @@
 
 <!-- title block -->
 
-<div id="map-description">
+<output id="map-description">
   {#key diagramTitle}
   <h2
     in:fly={{ y: 20, duration: 200, delay: 200 }}
@@ -351,15 +351,7 @@
     {diagramSubtitle || "James Goldie & Michael Joiner, 360info"}
   </p>
   {/key}
-  <!-- <p>Active button: {activeButton}</p>
-  <p>Map circ layer state: {activeButton == "walker-circulation-start" ?
-    "start" :
-    activeButton == "walker-circulation-mid" ?
-      "mid" :
-      activeButton == "walker-circulation-end" ?
-      "end" :
-      "hidden"}</p> -->
-</div>
+</output>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;700;900&display=swap');

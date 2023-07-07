@@ -51,6 +51,8 @@
     on:click={activateButton}
     on:keyup={onKeyUp}
     role="button"
+    aria-label={title}
+    aria-description={description}
     tabindex={tabindex}
     class="mapbutton"
     style:height={size + "px"}
