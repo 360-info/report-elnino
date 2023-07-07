@@ -4,7 +4,6 @@ description: An interactive map of El Niño impacts across the globe.
 author: James Goldie & Michael Joiner, 360info
 format:
   sverto-html:
-    css: svgmap.css
     anchor-sections: false
 resources:
   - storm-tower.png

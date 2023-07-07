@@ -41,28 +41,28 @@
         href="storm-tower.png"
         style:height="150"
         style:width="150"
-        style:y="30"
-        style:x={inNeutralState ? "190" : "190"}
+        y="30"
+        x="190"
         style:opacity={inNeutralState ? "0.4" : "0.8"}
         />
       <image
-        class="storm-tower"
+        class="storm-tower storm-tower-asia"
         class:inNeutralState
         href="storm-tower.png"
         style:height="150"
         style:width="150"
-        style:y="30"
-        style:x={inNeutralState ? "430" : "600"}
+        y="30"
+        x="600"
         style:opacity="0.8"
         />
       <image
-        class="storm-tower"
+        class="storm-tower storm-tower-america"
         class:inNeutralState
         href="storm-tower.png"
         style:height="150"
         style:width="150"
-        style:y="30"
-        style:x={inNeutralState ? "915" : "740"}
+        y="30"
+        x="740"
         style:opacity="0.8"
         />
       <!-- new ascend bits here -->
@@ -181,7 +181,7 @@
     class:deemphasised={layerState == "end"}
     transition:fade={{ duration: 300 }}
     role="figure"
-    aria-title="In neutral years"
+    aria-label="In neutral years"
     aria-description="First part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco."
     style:top="62.5%"
     style:left="5%">
@@ -195,7 +195,7 @@
     class="explanation-box"
     transition:fade={{ duration: 300 }}
     role="figure"
-    aria-title="In El Niño years"
+    aria-label="In El Niño years"
     aria-description="Second part of the explanation goes here. Adipisicing reprehenderit eiusmod officia commodo adipisicing labore fugiat sint esse laborum aute ullamco."
     class:deemphasised={layerState == "end"}
     style:top="62.5%"
@@ -310,9 +310,13 @@
   
   /* storm clouds */
   .storm-tower {
-    transition:
-      opacity 1.5s linear,
-      x 1.5s ease-out;
+    transition: opacity 1.5s linear, transform 1.5s ease-out;
+  }
+  .storm-tower-asia.inNeutralState {
+    transform: translateX(-170px);
+  }
+  .storm-tower-america.inNeutralState {
+    transform: translateX(175px);
   }
 
 </style>
