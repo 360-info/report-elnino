@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.176">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="James Goldie">
+
+<title>El Niño</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+
+
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-html/tabby.min.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+
+
+<link rel="stylesheet" href="site_libs/quarto-contrib/quarto-project/jimjam-slam/sverto/embed.css">
+<link rel="stylesheet" href="site_libs/quarto-contrib/quarto-project/jimjam-slam/sverto/modal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.2/font/bootstrap-icons.css">
+</head>
+
+<body>
+
+
+<header id="title-block-header">
+<h1 class="title">El Niño</h1>
+<p class="author">James Goldie</p>
+
+</header>
+
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.2     ✔ readr     2.1.4
+✔ forcats   1.0.0     ✔ stringr   1.5.0
+✔ ggplot2   3.4.2     ✔ tibble    3.2.1
+✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+✔ purrr     1.0.1     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors
+
+Attaching package: 'janitor'
+
+
+The following objects are masked from 'package:stats':
+
+    chisq.test, fisher.test
+
+
+here() starts at /workspaces/report-elnino</code></pre>
+</div>
+</div>
+<h2 id="analysis-ways-of-measuring-el-niño" class="anchored">Analysis: ways of measuring El Niño</h2>
+<p>For a few of these charts, we’re going to compare outcomes with an indicator measuring ENSO phase (El Niño, neutral or La Niña). But as ENSO is a phenomenon of both the atmosphere and the ocean, there’re a few ways to measure it. We’re going to compare those to see if it makes a lot of difference to our classifications.</p>
+<p>On the ocean side, the NINO34 index—also called the Oceanic Nino Index (ONI)—defines sea surface temperatures in the mid-eastern Pacific. An anomaly in that area from the long term average of at least +0.5°C defines an El Niño, while lower than -0.5°C defines a La Niña.</p>
+<p>On the atmospheric side, the Southern Oscillation Index (SOI) compares the air pressure difference between Tahiti and Darwin. An SOI below -8 for an extended period defines an El Niño; an SOI above +8 defines a La Niña.</p>
+<p>ONI is NOAA’s primary index for El Ni˜no measurement, but the Australian Bureau of Meteorology typically looks at both (as well as dynamical factors and seasonal forecast models) to make the call.</p>
+<p>Let’s load data in for both and compare. Nino3.4 comes from the <a href="https://psl.noaa.gov/gcos_wgsp/Timeseries/Nino34/">NASA Physical Sciences Laboratory</a>:</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: 17 parsing failures.
+row  col               expected    actual                                                             file
+155 year no trailing characters -99.99    '/workspaces/report-elnino/data/nasa-nino34-anomaly-monthly.txt'
+155 NA   13 columns             1 columns '/workspaces/report-elnino/data/nasa-nino34-anomaly-monthly.txt'
+156 year no trailing characters NINA34    '/workspaces/report-elnino/data/nasa-nino34-anomaly-monthly.txt'
+156 NA   13 columns             1 columns '/workspaces/report-elnino/data/nasa-nino34-anomaly-monthly.txt'
+157 year no trailing characters 5N-5S     '/workspaces/report-elnino/data/nasa-nino34-anomaly-monthly.txt'
+... .... ...................... ......... ................................................................
+See problems(...) for more details.</code></pre>
+</div>
+</div>
+<p>And here’s SOI over June-Sep each year:</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 1769 Columns: 2
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+dbl (2): year_month, soi
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+</div>
+<p>Now we can join and compare the two:</p>
+<p>When we demand that both indicators agree on a phase, we get a subset of the years manually indicated as an El Niño or La Niña by the Bureau of Meteorology. That could be because our indicators are focusing on June–September (partly because we’re interested in kharif crops later in this analysis), where some ENSO events might develop later (or maybe one of the ocean or atmosphere began later than the other).</p>
+<p>If we go with at least one of the indicators in a phase (provided the two don’t disagree with opposite phases), we get a list more consistent with the BOM.</p>
+<h2 id="analysis-indian-rainfall-and-enso" class="anchored">Analysis: Indian rainfall and ENSO</h2>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+Rows: 609 Columns: 12
+── Column specification
+──────────────────────────────────────────────────────── Delimiter: "," chr
+(1): ...1 dbl (11): Year, Actual Rainfall: JUN, Actual Rainfall: JUL, Actual
+Rainfall:...
+ℹ Use `spec()` to retrieve the full column specification for this data. ℹ
+Specify the column types or set `show_col_types = FALSE` to quiet this message.
+• `` -&gt; `...1`</code></pre>
+</div>
+</div>
+<h2 id="analysis-monthly-soi-to-jjas-soi" class="anchored">Analysis: monthly SOI to JJAS SOI</h2>
+<p>Let’s join the two and visualise by colour. Here’s the Southern Peninsula:</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<h2 id="analysis-crop-yield-and-enso" class="anchored">Analysis: crop yield and ENSO</h2>
+<p>Now let’s pull in crop yield data from <a href="http://data.icrisat.org">ICRISAT</a>. This data has columns for each crop <em>and</em> each of three measures:</p>
+<ol type="1">
+<li>Area (in thousands of hectares),</li>
+<li>Productions (in thousands of tons), and</li>
+<li>Yield (in kilograms per hectare)</li>
+</ol>
+<p>Let’s lengthen this a bit so that we can compute on all the dimensions, and we’ll classify the states according to the rainfall region that they’re in:</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 16146 Columns: 80
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr  (2): State Name, Dist Name
+dbl (78): Dist Code, Year, State Code, RICE AREA (1000 ha), RICE PRODUCTION ...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+</div>
+<h3 id="production-by-region-and-crop" class="anchored">Production by region and crop</h3>
+<p>Now that this is tidy, let’s start wide.</p>
+<p>Before we start looking at breakdowns across regions and crops, let’s first just find out which regions and crops produce the most (in mass terms!)</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'state_name'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Looks like biggest-producing states over 2005-2014 were all Central and North West region states.</p>
+<p>How about crops?</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>As expected, rice and wheat are big ones, followed by sugarcane, oilseeds and maize.</p>
+<p>We probably want to focus on <a href=""><em>kharif</em> crops</a>, which are ones grown during the monsoon season that are dependent on good rain. Rice and maize are both major kharif crops, but wheat is not—it’s a <em>rabi</em> crop, grown in the winter.</p>
+<h3 id="annual-yield-all-regions-and-crops" class="anchored">Annual yield (all regions and crops)</h3>
+<div>
+<blockquote>
+<p><strong>Note</strong></p>
+<p>Yield in kg/ha is <code>(production * 10^6) / (area in * 10^3)</code></p>
+</blockquote>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using method = 'loess' and formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>We can see that yield has increased steadily over time (likely thanks to technological improvements), but you can see a bit of year-to-year variation.</p>
+<p>There’s a lot of noise here, as we’re looking at parts of India and crops that are less dependent on rainfall.</p>
+<h3 id="yield-by-region" class="anchored">Yield by region</h3>
+<p>Let’s look at this two ways: all crops for each region, and each crop for all regions. We’ll start looking at each region:</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'year'. You can override using the
+`.groups` argument.
+`geom_smooth()` using method = 'loess' and formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>It’s interesting to see that yield variability has increased substantially in the last 20 years, particularly in Peninsular India.</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using method = 'loess' and formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 52 × 9
+    year .fitted   .resid elnino_yield neutral_yield lanina_yield elnino_resid
+   &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;        &lt;dbl&gt;         &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;
+ 1  1966   0.715 -0.0217        NA             0.693       NA           NA    
+ 2  1967   0.733 -0.0155        NA             0.717       NA           NA    
+ 3  1968   0.751 -0.0168        NA             0.734       NA           NA    
+ 4  1969   0.769 -0.00525       NA             0.764       NA           NA    
+ 5  1970   0.786  0.00689       NA            NA            0.793       NA    
+ 6  1971   0.804  0.0392        NA            NA            0.843       NA    
+ 7  1972   0.821 -0.0254         0.795        NA           NA            0.795
+ 8  1973   0.837  0.0616        NA            NA            0.899       NA    
+ 9  1974   0.853 -0.00981       NA            NA            0.843       NA    
+10  1975   0.869  0.0328        NA            NA            0.902       NA    
+11  1976   0.885 -0.0950        NA             0.790       NA           NA    
+12  1977   0.900  0.0602        NA             0.960       NA           NA    
+13  1978   0.916  0.0637        NA            NA            0.979       NA    
+14  1979   0.931  0.0271        NA             0.958       NA           NA    
+15  1980   0.945  0.0137        NA             0.959       NA           NA    
+16  1981   0.958  0.0726        NA             1.03        NA           NA    
+17  1982   0.972 -0.0221         0.950        NA           NA            0.950
+18  1983   0.985  0.00561       NA             0.991       NA           NA    
+19  1984   0.999 -0.0220        NA            NA            0.977       NA    
+20  1985   1.01  -0.0196        NA            NA            0.994       NA    
+21  1986   1.03  -0.0457        NA             0.985       NA           NA    
+22  1987   1.05  -0.0818         0.967        NA           NA            0.967
+23  1988   1.07   0.00675       NA            NA            1.07        NA    
+24  1989   1.09  -0.00816       NA            NA            1.08        NA    
+25  1990   1.10  -0.0419        NA             1.06        NA           NA    
+26  1991   1.12  -0.00144       NA             1.12        NA           NA    
+27  1992   1.13   0.0199        NA             1.15        NA           NA    
+28  1993   1.14   0.0678        NA             1.21        NA           NA    
+29  1994   1.15   0.0650        NA             1.22        NA           NA    
+30  1995   1.16   0.0382        NA             1.20        NA           NA    
+31  1996   1.17   0.00391       NA             1.17        NA           NA    
+32  1997   1.18  -0.0700         1.11         NA           NA            1.11 
+33  1998   1.19   0.146         NA            NA            1.34        NA    
+34  1999   1.21   0.0847        NA            NA            1.29        NA    
+35  2000   1.22   0.179         NA            NA            1.40        NA    
+36  2001   1.24   0.0181        NA             1.26        NA           NA    
+37  2002   1.25  -0.254          1.00         NA           NA            1.00 
+38  2003   1.27  -0.258         NA             1.02        NA           NA    
+39  2004   1.30  -0.132         NA             1.17        NA           NA    
+40  2005   1.32  -0.0607        NA             1.26        NA           NA    
+41  2006   1.35  -0.0266        NA             1.33        NA           NA    
+42  2007   1.38   0.119         NA            NA            1.50        NA    
+43  2008   1.42  -0.0214        NA             1.39        NA           NA    
+44  2009   1.45  -0.151          1.30         NA           NA            1.30 
+45  2010   1.49   0.0409        NA            NA            1.53        NA    
+46  2011   1.53   0.154         NA             1.68        NA           NA    
+47  2012   1.57  -0.116         NA             1.45        NA           NA    
+48  2013   1.62   0.139         NA             1.75        NA           NA    
+49  2014   1.66   0.0738        NA             1.74        NA           NA    
+50  2015   1.71  -0.226          1.49         NA           NA            1.49 
+51  2016   1.77  -0.141         NA             1.63        NA           NA    
+52  2017   1.82   0.235         NA             2.06        NA           NA    
+# ℹ 2 more variables: neutral_resid &lt;dbl&gt;, lanina_resid &lt;dbl&gt;</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The strong relationship here in Peninsular India, with a weaker relationship in Central India.</p>
+<h3 id="crops-grown-by-region" class="anchored">Crops grown by region</h3>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'rainfall_region'. You can override using
+the `.groups` argument.</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Rice is a major crop in all four regions—Peninsular India contributed around 25 million tonnes in 2022 (about 20% of the national total).</p>
+<p>Maize is another crop grown in this season, and Peninsular India is a major grower—about 13 million tonnes (about 40% of the national total).</p>
+<p>The other big crops in</p>
+<h3 id="yield-by-crop" class="anchored">Yield by crop</h3>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'year'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Crops that seem to be most affected by ENSO include Groundnut, Cotton, Pigeonpea, Pulses and Soyabean. Others with a possible but marginal-looking relationship include Maize, Millet, Mustard, Oilseed, Safflower and Rice.</p>
+<h2 id="analysis-crop-yield-and-rainfall" class="anchored">Analysis: crop yield and rainfall</h2>
+<p>That said, using SOI directly as a predictor might not be the way to go. It might be helpful to look at rainfall more directly as a predictor and then see the effect of ENSO on top.</p>
+<p>The first thing we’ll need to do is match Indian states to rainfall regions (NE, NW, central, peninsular). Then we can join the rainfall and crop yield datasets.</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'year', 'rainfall_region'. You can override
+using the `.groups` argument.</code></pre>
+</div>
+</div>
+<p>It still looks like the stronger relationship here is with certain crops rather than certain regions, but let’s break it down by both.</p>
+<h2 id="analysis-enso-and-global-and-national-temperatures" class="anchored">Analysis: ENSO and global and national temperatures</h2>
+<p>Here, global and national temperatures are courtesy of <a href="https://berkeleyearth.org/data/">Berkeley Earth</a>. They have generously agreed to licence the data here under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution (CC BY 4.0)</a>.</p>
+<p>Let’s start with global temperature data:</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: 1 parsing failure.
+row col   expected    actual                                                               file
+  1  -- 12 columns 1 columns '/workspaces/report-elnino/data/berkeley-monthly-tavg-ecuador.txt'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: 1 parsing failure.
+row col   expected    actual                                                               file
+  1  -- 12 columns 1 columns '/workspaces/report-elnino/data/berkeley-monthly-tavg-florida.txt'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: 1 parsing failure.
+row col   expected    actual                                                              file
+  1  -- 12 columns 1 columns '/workspaces/report-elnino/data/berkeley-monthly-tavg-global.txt'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: 1 parsing failure.
+row col   expected    actual                                                                 file
+  1  -- 12 columns 1 columns '/workspaces/report-elnino/data/berkeley-monthly-tavg-indonesia.txt'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: 1 parsing failure.
+row col   expected    actual                                                                file
+  1  -- 12 columns 1 columns '/workspaces/report-elnino/data/berkeley-monthly-tavg-malaysia.txt'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: 1 parsing failure.
+row col   expected    actual                                                                   file
+  1  -- 12 columns 1 columns '/workspaces/report-elnino/data/berkeley-monthly-tavg-new_zealand.txt'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: 1 parsing failure.
+row col   expected    actual                                                             file
+  1  -- 12 columns 1 columns '/workspaces/report-elnino/data/berkeley-monthly-tavg-texas.txt'</code></pre>
+</div>
+</div>
+<p>Let’s join it to the Nino3.4, which we have monthly across the whole year. But we might need a smoother on those first.</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: There was 1 warning in `mutate()`.
+ℹ In argument: `date = ymd(paste(year, month, "01"))`.
+Caused by warning:
+!  6 failed to parse.</code></pre>
+</div>
+</div>
+<p>First let’s look at the global picture:</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 24 rows containing missing values (`geom_segment()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 24 rows containing missing values (`geom_line()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 24 rows containing missing values (`geom_segment()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 24 rows containing missing values (`geom_line()`).</code></pre>
+</div>
+</div>
+<p>And then some selected regions:</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 11 rows containing missing values (`geom_segment()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 31 rows containing missing values (`geom_segment()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 30 rows containing missing values (`geom_segment()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 11 rows containing missing values (`geom_line()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 11 rows containing missing values (`geom_segment()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 31 rows containing missing values (`geom_segment()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 30 rows containing missing values (`geom_segment()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 11 rows containing missing values (`geom_line()`).</code></pre>
+</div>
+</div>
+
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+  tabsets.forEach(function(tabset) {
+    const tabby = new Tabby('#' + tabset.id);
+  });
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'light-border',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    if (id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        for (let i = 0; i < 2; i++) {
+          container.appendChild(note.children[i].cloneNode(true));
+        }
+        return container.innerHTML
+      } else {
+        return note.innerHTML;
+      }
+    } else {
+      return note.innerHTML;
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      try { hash = new URL(url).hash; } catch {}
+      const id = hash.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note !== null) {
+        try {
+          const html = processXRef(id, note);
+          instance.setContent(html);
+        } finally {
+          instance.enable();
+          instance.show();
+        }
+      } else {
+        // See if we can fetch this
+        fetch(url.split('#')[0])
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.getElementById(id);
+          if (note !== null) {
+            const html = processXRef(id, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+
+
+
+
+</body></html>
