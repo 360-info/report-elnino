@@ -78,7 +78,7 @@
     sizeClass == "x-large" ? 45 : 
     sizeClass == "large" ? 40 :
     sizeClass == "medium" ? 30 :
-    20;
+    25;
 
 </script>
 
@@ -198,7 +198,7 @@
     <!-- Australia -->
     <Button
       icon="fa6-solid:sun-plant-wilt"
-      top="52%" left="45%" color="#994000"
+      top="44%" left="46%" color="#994000"
       size={buttonSize}
       buttonID="drought-seaus"
       title="Drought in SE Australia"
@@ -214,7 +214,7 @@
       />
     <Button
       icon="fa6-solid:fire"
-      top="46%" left="48%" color="#ff4600"
+      top="53%" left="51%" color="#ff4600"
       size={buttonSize}
       buttonID="fire-seaus"
       title="Fire in SE Australia"
@@ -247,7 +247,7 @@
     <!-- Pacific -->
     <Button
       icon="fa6-solid:sun-plant-wilt"
-      top="41%" left="53%" color="#994000"
+      top="41%" left="55%" color="#994000"
       size={buttonSize}
       buttonID="drought-spac"
       title="Drought in the south Pacific"
