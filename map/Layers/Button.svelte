@@ -57,6 +57,8 @@
     class="mapbutton"
     style:height={size + "px"}
     style:width={size + "px"}
+    style:margin-top={"-" + (size / 2) + "px"}
+    style:margin-left={"-" + (size / 2) + "px"}
     style:top={top}
     style:left={left}
     style:position="absolute"
