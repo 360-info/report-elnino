@@ -238,3 +238,17 @@
 #edshare.clicked.done {
   opacity: 0;
 }
+
+@media (max-width: 45em) {
+  #edshare {
+    transform: scale(0.8);
+    transform-origin: top right;
+  }
+}
+
+@media (max-width: 34em) {
+  #edshare {
+    transform: scale(0.7);
+    transform-origin: top right;
+  }
+}
