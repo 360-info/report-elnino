@@ -284,7 +284,7 @@
       top="18%" left="68%" color="#005bd0"
       size={buttonSize}
       buttonID="flood-seusa"
-      diagramTitle = "Extreme rain in SW USA"
+      title="Extreme rain in SW USA"
       description="Jet streams are fast streams of air that wrap around the Earth, high up in the atmosphere. El Niño diverts the subtropical northern hemisphere jet over the southwestern US, where it often brings extreme rainfall and flooding to states like California."
       on:buttonActivate={updateTitleBlock}
       layerState={
@@ -300,7 +300,7 @@
       top="15%" left="82%" color="#0095d0" iconScale=0.5
       size={buttonSize}
       buttonID="hurricane-alt"
-      diagramTitle = "Hurricanes ↓ in nth Atlantic"
+      title="Hurricanes ↓ in nth Atlantic"
       description="On average, hurricanes (called <em>typhoons</em> or <em>tropical cyclones</em> elsewhere) tend to be less frequent in the North Atlantic Ocean during an El Niño.<br><br>However, this year NOAA has forecast an average hurricane season despite the El Niño. This is because the North Atlantic is very warm, promoting hurricane activity."
       on:buttonActivate={updateTitleBlock}
       layerState={
@@ -317,7 +317,7 @@
       top="36%" left="78%" color="#994000" iconScale=0.5
       size={buttonSize}
       buttonID="foodsec-stham"
-      diagramTitle = "Food security in Sth America"
+      title="Food security in Sth America"
       description="El Niño was <a href='https://earthobservatory.nasa.gov/features/ElNino/page3.php'>named hundreds of years ago by Peruvian fishers</a>, who noticed a change in the currents that would bring hot water and a smaller catch.<br><br>El Niño continues to impact catches and change the species available to fisheries off the coast of South America."
       on:buttonActivate={updateTitleBlock}
       layerState={
