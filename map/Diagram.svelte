@@ -317,7 +317,7 @@
       top="36%" left="78%" color="#994000" iconScale=0.5
       size={buttonSize}
       buttonID="foodsec-stham"
-      title="Food security in Sth America"
+      title="Food insecurity in Sth America"
       description="El Niño was <a href='https://earthobservatory.nasa.gov/features/ElNino/page3.php'>named hundreds of years ago by Peruvian fishers</a>, who noticed a change in the currents that would bring hot water and a smaller catch.<br><br>El Niño continues to impact catches and change the species available to fisheries off the coast of South America."
       on:buttonActivate={updateTitleBlock}
       layerState={
